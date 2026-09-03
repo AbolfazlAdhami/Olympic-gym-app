@@ -1,0 +1,18 @@
+{
+  "name": "gym-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted bodybuilding and gym application",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/api",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
