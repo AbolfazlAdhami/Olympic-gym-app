@@ -80,3 +80,6 @@ temp/
 *.key
 *.p12
 *.mobileprovision
+
+
+.DS_Store 
