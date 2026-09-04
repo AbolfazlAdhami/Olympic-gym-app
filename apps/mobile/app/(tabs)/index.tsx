@@ -1,40 +1,43 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gym App</Text>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title">Gym App</ThemedText>
 
-      <Text style={styles.subtitle}>Your bodybuilding journey starts here.</Text>
+      <ThemedText type="subtitle">Your bodybuilding journey starts here.</ThemedText>
 
-      <Link href="/exercises" style={styles.link}>
-        Browse Exercises
-      </Link>
-    </View>
+      <ThemedView style={styles.energyCard}>
+        <ThemedText style={styles.energyLabel}>TODAY'S ENERGY</ThemedText>
+
+        <ThemedText style={styles.energyValue}>Ready to train</ThemedText>
+      </ThemedView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 24,
+    justifyContent: "center",
   },
-  title: {
-    fontSize: 32,
+  energyCard: {
+    marginTop: 32,
+    padding: 20,
+    borderRadius: 16,
+  },
+  energyLabel: {
+    fontSize: 12,
     fontWeight: "700",
+    letterSpacing: 1,
   },
-  subtitle: {
+  energyValue: {
     marginTop: 8,
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-  },
-  link: {
-    marginTop: 24,
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 22,
+    fontWeight: "700",
   },
 });

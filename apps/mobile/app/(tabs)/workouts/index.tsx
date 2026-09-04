@@ -1,29 +1,22 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function WorkoutsScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Workouts</Text>
-      <Text style={styles.subtitle}>Your workout plans will appear here.</Text>
-    </View>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title">Workouts</ThemedText>
+
+      <ThemedText type="subtitle">Your workout plans will appear here.</ThemedText>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 24,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-  },
-  subtitle: {
-    marginTop: 8,
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+    justifyContent: "center",
   },
 });

@@ -1,29 +1,22 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
+
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <Text style={styles.subtitle}>Your profile will appear here.</Text>
-    </View>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title">Profile</ThemedText>
+
+      <ThemedText type="subtitle">Your profile will appear here.</ThemedText>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     padding: 24,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-  },
-  subtitle: {
-    marginTop: 8,
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
+    justifyContent: "center",
   },
 });
