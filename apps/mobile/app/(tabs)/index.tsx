@@ -10,7 +10,7 @@ export default function HomeScreen() {
 
       <ThemedText type="subtitle">Your bodybuilding journey starts here.</ThemedText>
 
-      <ThemedView style={styles.energyCard}>
+      <ThemedView lightColor="#DCFCE7" darkColor="#163B22" style={styles.energyCard}>
         <ThemedText style={styles.energyLabel}>TODAY'S ENERGY</ThemedText>
 
         <ThemedText style={styles.energyValue}>Ready to train</ThemedText>
