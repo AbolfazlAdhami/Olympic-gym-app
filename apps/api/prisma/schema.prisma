@@ -1,0 +1,56 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Exercise {
+  id     String @id @default(uuid())
+  nameEn String
+  slug   String @unique
+
+  equipment  String?
+  category   String?
+  difficulty String?
+
+  gifUrl       String?
+  videoUrl     String?
+  thumbnailUrl String?
+
+  translations ExerciseTranslation[]
+  aliases      ExerciseAlias[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ExerciseTranslation {
+  id String @id @default(uuid())
+
+  exerciseId String
+  language   String
+
+  name        String
+  description String?
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, language])
+}
+
+model ExerciseAlias {
+  id String @id @default(uuid())
+
+  exerciseId String
+  language   String
+  alias      String
+  normalized String
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([normalized])
+}
