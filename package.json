@@ -4,7 +4,7 @@
   "private": true,
   "description": "Self-hosted bodybuilding and gym application",
   "workspaces": [
-    "apps/*",
+    "apps/api",
     "packages/*"
   ],
   "scripts": {
