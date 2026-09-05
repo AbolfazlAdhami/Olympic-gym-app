@@ -52,6 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Exercise: 'Exercise',
+  ExerciseMuscle: 'ExerciseMuscle',
+  ExerciseSecondaryMuscle: 'ExerciseSecondaryMuscle',
+  ExerciseInstruction: 'ExerciseInstruction',
+  ExerciseImage: 'ExerciseImage',
   ExerciseTranslation: 'ExerciseTranslation',
   ExerciseAlias: 'ExerciseAlias'
 } as const
@@ -76,17 +80,54 @@ export const ExerciseScalarFieldEnum = {
   id: 'id',
   nameEn: 'nameEn',
   slug: 'slug',
+  force: 'force',
+  mechanic: 'mechanic',
   equipment: 'equipment',
   category: 'category',
   difficulty: 'difficulty',
-  gifUrl: 'gifUrl',
-  videoUrl: 'videoUrl',
-  thumbnailUrl: 'thumbnailUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ExerciseScalarFieldEnum = (typeof ExerciseScalarFieldEnum)[keyof typeof ExerciseScalarFieldEnum]
+
+
+export const ExerciseMuscleScalarFieldEnum = {
+  id: 'id',
+  exerciseId: 'exerciseId',
+  muscle: 'muscle'
+} as const
+
+export type ExerciseMuscleScalarFieldEnum = (typeof ExerciseMuscleScalarFieldEnum)[keyof typeof ExerciseMuscleScalarFieldEnum]
+
+
+export const ExerciseSecondaryMuscleScalarFieldEnum = {
+  id: 'id',
+  exerciseId: 'exerciseId',
+  muscle: 'muscle'
+} as const
+
+export type ExerciseSecondaryMuscleScalarFieldEnum = (typeof ExerciseSecondaryMuscleScalarFieldEnum)[keyof typeof ExerciseSecondaryMuscleScalarFieldEnum]
+
+
+export const ExerciseInstructionScalarFieldEnum = {
+  id: 'id',
+  exerciseId: 'exerciseId',
+  step: 'step',
+  text: 'text'
+} as const
+
+export type ExerciseInstructionScalarFieldEnum = (typeof ExerciseInstructionScalarFieldEnum)[keyof typeof ExerciseInstructionScalarFieldEnum]
+
+
+export const ExerciseImageScalarFieldEnum = {
+  id: 'id',
+  exerciseId: 'exerciseId',
+  url: 'url',
+  position: 'position'
+} as const
+
+export type ExerciseImageScalarFieldEnum = (typeof ExerciseImageScalarFieldEnum)[keyof typeof ExerciseImageScalarFieldEnum]
 
 
 export const ExerciseTranslationScalarFieldEnum = {

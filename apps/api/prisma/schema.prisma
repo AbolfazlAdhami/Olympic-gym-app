@@ -8,29 +8,74 @@ datasource db {
   provider = "postgresql"
 }
 
+
 model Exercise {
   id     String @id @default(uuid())
   nameEn String
   slug   String @unique
 
+  force      String?
+  mechanic   String?
   equipment  String?
   category   String?
   difficulty String?
 
-  gifUrl       String?
-  videoUrl     String?
-  thumbnailUrl String?
+  primaryMuscles   ExerciseMuscle[]
+  secondaryMuscles ExerciseSecondaryMuscle[]
 
+  instructions ExerciseInstruction[]
   translations ExerciseTranslation[]
   aliases      ExerciseAlias[]
+  images       ExerciseImage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model ExerciseTranslation {
-  id String @id @default(uuid())
+model ExerciseMuscle {
+  id         String @id @default(uuid())
+  exerciseId String
+  muscle     String
 
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, muscle])
+}
+
+model ExerciseSecondaryMuscle {
+  id         String @id @default(uuid())
+  exerciseId String
+  muscle     String
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, muscle])
+}
+
+model ExerciseInstruction {
+  id         String @id @default(uuid())
+  exerciseId String
+  step       Int
+  text       String
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, step])
+}
+
+model ExerciseImage {
+  id         String @id @default(uuid())
+  exerciseId String
+  url        String
+  position   Int
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseId, position])
+}
+
+model ExerciseTranslation {
+  id         String @id @default(uuid())
   exerciseId String
   language   String
 
@@ -43,8 +88,7 @@ model ExerciseTranslation {
 }
 
 model ExerciseAlias {
-  id String @id @default(uuid())
-
+  id         String @id @default(uuid())
   exerciseId String
   language   String
   alias      String

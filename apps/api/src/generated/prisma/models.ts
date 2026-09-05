@@ -9,6 +9,10 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Exercise.js'
+export type * from './models/ExerciseMuscle.js'
+export type * from './models/ExerciseSecondaryMuscle.js'
+export type * from './models/ExerciseInstruction.js'
+export type * from './models/ExerciseImage.js'
 export type * from './models/ExerciseTranslation.js'
 export type * from './models/ExerciseAlias.js'
 export type * from './commonInputTypes.js'

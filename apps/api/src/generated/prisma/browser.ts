@@ -23,6 +23,26 @@ export * from './enums.js';
  */
 export type Exercise = Prisma.ExerciseModel
 /**
+ * Model ExerciseMuscle
+ * 
+ */
+export type ExerciseMuscle = Prisma.ExerciseMuscleModel
+/**
+ * Model ExerciseSecondaryMuscle
+ * 
+ */
+export type ExerciseSecondaryMuscle = Prisma.ExerciseSecondaryMuscleModel
+/**
+ * Model ExerciseInstruction
+ * 
+ */
+export type ExerciseInstruction = Prisma.ExerciseInstructionModel
+/**
+ * Model ExerciseImage
+ * 
+ */
+export type ExerciseImage = Prisma.ExerciseImageModel
+/**
  * Model ExerciseTranslation
  * 
  */
