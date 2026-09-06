@@ -4,7 +4,7 @@ import type { ExerciseQuery } from "./exercise.query";
 import { normalizePersian } from "@gym-app/utils";
 
 export async function findExercises(query: ExerciseQuery) {
-  const { page, limit, q, equipment, category, difficulty, muscle } = query;
+  const { page, limit, q, equipment, category, difficulty, muscle, order } = query;
 
   const filters: Prisma.ExerciseWhereInput[] = [];
 
@@ -109,7 +109,7 @@ export async function findExercises(query: ExerciseQuery) {
       where,
       skip,
       take: limit,
-      orderBy: [{ nameEn: "asc" }, { id: "asc" }],
+      orderBy: [{ nameEn: order }, { id: "asc" }],
       include: {
         primaryMuscles: true,
         secondaryMuscles: true,

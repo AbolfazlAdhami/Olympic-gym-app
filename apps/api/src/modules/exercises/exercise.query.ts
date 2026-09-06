@@ -14,6 +14,8 @@ export const exerciseQuerySchema = z.object({
   category: z.string().trim().min(1).optional(),
   difficulty: z.string().trim().min(1).optional(),
   muscle: z.string().trim().min(1).optional(),
+  order: z.enum(["asc", "desc"]).default("asc"),
+  sort: z.enum(["name"]).default("name"),
 });
 
 export type ExerciseQuery = z.infer<typeof exerciseQuerySchema>;
@@ -21,3 +23,4 @@ export type ExerciseQuery = z.infer<typeof exerciseQuerySchema>;
 export function parseExerciseQuery(query: Record<string, unknown>) {
   return exerciseQuerySchema.parse(query);
 }
+
