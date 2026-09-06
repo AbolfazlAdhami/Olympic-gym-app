@@ -1,5 +1,5 @@
 import { findExerciseById, findExercises } from "./exercise.repository";
-
+import { toExerciseDto, type ExerciseDto } from "./exercise.dto";
 import type { ExerciseQuery } from "./exercise.query";
 
 export async function getExercises(query: ExerciseQuery) {
@@ -10,7 +10,7 @@ export async function getExercises(query: ExerciseQuery) {
   const totalPages = Math.ceil(total / limit);
 
   return {
-    items,
+    items: items.map(toExerciseDto),
     meta: {
       page,
       limit,
@@ -20,12 +20,12 @@ export async function getExercises(query: ExerciseQuery) {
   };
 }
 
-export async function getExerciseById(id: string) {
+export async function getExerciseById(id: string): Promise<ExerciseDto> {
   const exercise = await findExerciseById(id);
 
   if (!exercise) {
     throw new Error("Exercise not found");
   }
 
-  return exercise;
+  return toExerciseDto(exercise);
 }

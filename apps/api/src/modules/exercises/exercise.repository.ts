@@ -104,38 +104,53 @@ export async function findExercises(query: ExerciseQuery) {
   };
 
   const skip = (page - 1) * limit;
-
   const [items, total] = await prisma.$transaction([
     prisma.exercise.findMany({
       where,
       skip,
       take: limit,
-      orderBy: {
-        nameEn: "asc",
-      },
+      orderBy: [{ nameEn: "asc" }, { id: "asc" }],
       include: {
+        primaryMuscles: true,
+        secondaryMuscles: true,
+        instructions: {
+          orderBy: {
+            step: "asc",
+          },
+        },
+        images: {
+          orderBy: {
+            position: "asc",
+          },
+        },
         translations: true,
         aliases: true,
       },
     }),
-
-    prisma.exercise.count({
-      where,
-    }),
+    prisma.exercise.count({ where }),
   ]);
 
-  return {
-    items,
-    total,
-  };
+  return { items, total };
 }
+
+
 
 export async function findExerciseById(id: string) {
   return prisma.exercise.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
     include: {
+      primaryMuscles: true,
+      secondaryMuscles: true,
+      instructions: {
+        orderBy: {
+          step: "asc",
+        },
+      },
+      images: {
+        orderBy: {
+          position: "asc",
+        },
+      },
       translations: true,
       aliases: true,
     },
