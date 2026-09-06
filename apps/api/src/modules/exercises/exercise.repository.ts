@@ -1,61 +1,78 @@
 import { prisma } from "../../config/database";
+import { Prisma } from "../../generated/prisma/client";
 import type { ExerciseQuery } from "./exercise.query";
 
 export async function findExercises(query: ExerciseQuery) {
   const { page, limit, q, equipment, category, difficulty, muscle } = query;
 
-  const where = {
-    ...(q
-      ? {
-          OR: [
-            {
-              nameEn: {
-                contains: q,
-                mode: "insensitive" as const,
+  const filters: Prisma.ExerciseWhereInput[] = [];
+
+  if (q) {
+    filters.push({
+      OR: [
+        {
+          nameEn: {
+            contains: q,
+            mode: "insensitive",
+          },
+        },
+        {
+          slug: {
+            contains: q,
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  if (equipment) {
+    filters.push({
+      equipment,
+    });
+  }
+
+  if (category) {
+    filters.push({
+      category,
+    });
+  }
+
+  if (difficulty) {
+    filters.push({
+      difficulty,
+    });
+  }
+
+  if (muscle) {
+    filters.push({
+      OR: [
+        {
+          primaryMuscles: {
+            some: {
+              muscle: {
+                equals: muscle,
+                mode: "insensitive",
               },
             },
-            {
-              slug: {
-                contains: q,
-                mode: "insensitive" as const,
+          },
+        },
+        {
+          secondaryMuscles: {
+            some: {
+              muscle: {
+                equals: muscle,
+                mode: "insensitive",
               },
             },
-          ],
-        }
-      : {}),
+          },
+        },
+      ],
+    });
+  }
 
-    ...(equipment ? { equipment } : {}),
-
-    ...(category ? { category } : {}),
-
-    ...(difficulty ? { difficulty } : {}),
-
-    ...(muscle
-      ? {
-          OR: [
-            {
-              primaryMuscles: {
-                some: {
-                  muscle: {
-                    equals: muscle,
-                    mode: "insensitive" as const,
-                  },
-                },
-              },
-            },
-            {
-              secondaryMuscles: {
-                some: {
-                  muscle: {
-                    equals: muscle,
-                    mode: "insensitive" as const,
-                  },
-                },
-              },
-            },
-          ],
-        }
-      : {}),
+  const where: Prisma.ExerciseWhereInput = {
+    AND: filters,
   };
 
   const skip = (page - 1) * limit;
