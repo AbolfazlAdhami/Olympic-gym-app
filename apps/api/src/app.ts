@@ -15,6 +15,11 @@ app.get("/api/v1/health", (_req, res) => {
   });
 });
 
+//  Test Error Route
+app.get("/api/v1/test-error", () => {
+  throw new Error("Something went wrong");
+});
+
 app.use("/api/v1/exercises", exerciseRoutes);
 
 app.use(errorMiddleware);
