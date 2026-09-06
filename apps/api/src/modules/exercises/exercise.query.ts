@@ -1,5 +1,3 @@
-import { normalizePersian } from "@gym-app/utils";
-
 export type ExerciseQuery = {
   page: number;
   limit: number;

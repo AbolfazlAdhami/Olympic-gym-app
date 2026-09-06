@@ -1,6 +1,7 @@
 import { prisma } from "../../config/database";
 import { Prisma } from "../../generated/prisma/client";
 import type { ExerciseQuery } from "./exercise.query";
+import { normalizePersian } from "@gym-app/utils";
 
 export async function findExercises(query: ExerciseQuery) {
   const { page, limit, q, equipment, category, difficulty, muscle } = query;
@@ -8,6 +9,8 @@ export async function findExercises(query: ExerciseQuery) {
   const filters: Prisma.ExerciseWhereInput[] = [];
 
   if (q) {
+    const normalizedQ = normalizePersian(q);
+
     filters.push({
       OR: [
         {
@@ -20,6 +23,31 @@ export async function findExercises(query: ExerciseQuery) {
           slug: {
             contains: q,
             mode: "insensitive",
+          },
+        },
+        {
+          translations: {
+            some: { name: { contains: normalizedQ, mode: "insensitive" } },
+          },
+        },
+        {
+          aliases: {
+            some: {
+              alias: {
+                contains: normalizedQ,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+        {
+          aliases: {
+            some: {
+              normalized: {
+                contains: normalizedQ,
+                mode: "insensitive",
+              },
+            },
           },
         },
       ],

@@ -12,6 +12,7 @@
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {
+    "@gym-app/utils": "^0.1.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "cors": "^2.8.6",
