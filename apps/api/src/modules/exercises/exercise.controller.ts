@@ -3,6 +3,8 @@ import type { Request, Response } from "express";
 import { parseExerciseQuery } from "./exercise.query";
 import { getExerciseById, getExercises } from "./exercise.service";
 
+import { NotFoundError } from "../../errors/app-error";
+
 export async function getExercisesController(req: Request, res: Response) {
   try {
     const query = parseExerciseQuery(req.query);
@@ -31,16 +33,13 @@ export async function getExerciseByIdController(req: Request, res: Response) {
       data: exercise,
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "Exercise not found") {
-      res.status(404).json({
-        error: "Exercise not found",
+    if (error instanceof NotFoundError) {
+      res.status(error.statusCode).json({
+        error: error.message,
       });
 
       return;
     }
-
-    console.error(error);
-
     res.status(500).json({
       error: "Internal server error",
     });
