@@ -297,3 +297,52 @@ it("returns an empty result when no exercises match", async () => {
     totalPages: 0,
   });
 });
+
+
+
+
+describe("Persian exercise search", () => {
+  it("finds an exercise by Persian translation", async () => {
+    const response = await request(app).get("/api/v1/exercises").query({
+      q: "پرس سینه هالتر",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.meta.total).toBeGreaterThan(0);
+
+    expect(response.body.data.some((exercise: { id: string }) => exercise.id === "2b37947c-0f14-4652-a30a-745f57df83cd")).toBe(true);
+  });
+
+  it("finds an exercise when Persian ZWNJ is used", async () => {
+    const response = await request(app).get("/api/v1/exercises").query({
+      q: "پرس‌سینه",
+    });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.data.some((exercise: { id: string }) => exercise.id === "2b37947c-0f14-4652-a30a-745f57df83cd")).toBe(true);
+  });
+
+  it("finds an exercise when Persian ZWNJ is replaced with a space", async () => {
+    const response = await request(app).get("/api/v1/exercises").query({
+      q: "پرس سینه",
+    });
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.data.some((exercise: { id: string }) => exercise.id === "2b37947c-0f14-4652-a30a-745f57df83cd")).toBe(true);
+  });
+
+  it("finds an exercise through its Persian alias", async () => {
+    const response = await request(app).get("/api/v1/exercises").query({
+      q: "پرس‌سینه",
+    });
+
+    expect(response.status).toBe(200);
+
+    const exercise = response.body.data.find((item: { id: string }) => item.id === "2b37947c-0f14-4652-a30a-745f57df83cd");
+
+    expect(exercise).toBeDefined();
+    expect(exercise.name).toBe("Barbell Bench Press - Medium Grip");
+  });
+});
