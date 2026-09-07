@@ -3,14 +3,21 @@ import type { Request, Response } from "express";
 import { parseExerciseQuery } from "./exercise.query";
 import { getExerciseById, getExercises } from "./exercise.service";
 import { listResponse, successResponse } from "../../shared/http/api-response";
-
+import { mapExercise } from "./exercise.mapper";
 
 export async function getExercisesController(req: Request, res: Response) {
   const query = parseExerciseQuery(req.query);
 
   const result = await getExercises(query);
 
-  res.json(listResponse(result.items, result.meta));
+ return res.json(
+   listResponse(result.items, {
+     page: query.page,
+     limit: query.limit,
+     total: result.meta.total,
+     totalPages: Math.ceil(result.meta.total / query.limit),
+   }),
+ );
 }
 
 export async function getExerciseByIdController(req: Request, res: Response) {

@@ -11,7 +11,7 @@ export async function getExercises(query: ExerciseQuery) {
   const totalPages = Math.ceil(total / limit);
 
   return {
-    items: items.map(toExerciseDto),
+    items: items,
     meta: {
       page,
       limit,
@@ -28,5 +28,5 @@ export async function getExerciseById(id: string): Promise<ExerciseDto> {
     throw new NotFoundError("Exercise not found");
   }
 
-  return toExerciseDto(exercise);
+  return exercise;
 }

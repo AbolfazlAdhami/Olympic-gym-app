@@ -1,5 +1,6 @@
 import { prisma } from "../../config/database";
 import { Prisma } from "../../generated/prisma/client";
+import { toExerciseDto } from "./exercise.dto";
 import type { ExerciseQuery } from "./exercise.query";
 import { normalizePersian } from "@gym-app/utils";
 
@@ -127,16 +128,18 @@ export async function findExercises(query: ExerciseQuery) {
         aliases: true,
       },
     }),
+
     prisma.exercise.count({ where }),
   ]);
 
-  return { items, total };
+  return {
+    items: items.map(toExerciseDto),
+    total,
+  };
 }
 
-
-
 export async function findExerciseById(id: string) {
-  return prisma.exercise.findUnique({
+  const exercise = await prisma.exercise.findUnique({
     where: { id },
     include: {
       primaryMuscles: true,
@@ -155,4 +158,6 @@ export async function findExerciseById(id: string) {
       aliases: true,
     },
   });
+
+  return exercise ? toExerciseDto(exercise) : null;
 }
