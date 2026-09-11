@@ -1,62 +1,43 @@
-import type { Exercise } from "../../generated/prisma/client";
+import type { Exercise, ExerciseAlias, ExerciseImage, ExerciseInstruction, ExerciseMuscle, ExerciseSecondaryMuscle, ExerciseTranslation } from "../../generated/prisma/client";
+import type { ExerciseDto } from "./exercise.dto";
 
 type ExerciseWithRelations = Exercise & {
-  primaryMuscles: {
-    muscle: string;
-  }[];
-
-  secondaryMuscles: {
-    muscle: string;
-  }[];
-
-  instructions: {
-    step: number;
-    text: string;
-  }[];
-
-  images: {
-    url: string;
-    position: number;
-  }[];
-
-  translations: {
-    language: string;
-    name: string;
-    description: string | null;
-  }[];
-
-  aliases: {
-    language: string;
-    alias: string;
-    normalized: string;
-  }[];
+  primaryMuscles: ExerciseMuscle[];
+  secondaryMuscles: ExerciseSecondaryMuscle[];
+  instructions: ExerciseInstruction[];
+  translations: ExerciseTranslation[];
+  aliases: ExerciseAlias[];
+  images: ExerciseImage[];
 };
 
-export function mapExercise(exercise: ExerciseWithRelations) {
+export function toExerciseDto(exercise: ExerciseWithRelations): ExerciseDto {
   return {
     id: exercise.id,
     name: exercise.nameEn,
     slug: exercise.slug,
 
-    metadata: {
-      force: exercise.force,
-      mechanic: exercise.mechanic,
-      equipment: exercise.equipment,
-      category: exercise.category,
-      difficulty: exercise.difficulty,
-    },
+    force: exercise.force,
+    mechanic: exercise.mechanic,
+    equipment: exercise.equipment,
+    category: exercise.category,
+    difficulty: exercise.difficulty,
 
-    muscles: {
-      primary: exercise.primaryMuscles.map((item) => item.muscle),
-      secondary: exercise.secondaryMuscles.map((item) => item.muscle),
-    },
+    primaryMuscles: exercise.primaryMuscles.map((item) => item.muscle),
+
+    secondaryMuscles: exercise.secondaryMuscles.map((item) => item.muscle),
 
     instructions: exercise.instructions.map((item) => ({
       step: item.step,
       text: item.text,
     })),
 
-    images: exercise.images.sort((a, b) => a.position - b.position).map((item) => item.url),
+    images: exercise.images
+      .slice()
+      .sort((a, b) => a.position - b.position)
+      .map((item) => ({
+        url: item.url,
+        position: item.position,
+      })),
 
     translations: exercise.translations.map((item) => ({
       language: item.language,
@@ -67,7 +48,6 @@ export function mapExercise(exercise: ExerciseWithRelations) {
     aliases: exercise.aliases.map((item) => ({
       language: item.language,
       alias: item.alias,
-      normalized: item.normalized,
     })),
   };
 }

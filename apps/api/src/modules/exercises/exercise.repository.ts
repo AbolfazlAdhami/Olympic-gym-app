@@ -1,6 +1,6 @@
 import { prisma } from "../../config/database";
 import { Prisma } from "../../generated/prisma/client";
-import { toExerciseDto } from "./exercise.dto";
+import { toExerciseDto } from "./exercise.mapper";
 import type { ExerciseQuery } from "./exercise.query";
 import { normalizePersian } from "@gym-app/utils";
 

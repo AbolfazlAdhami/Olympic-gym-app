@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { parseExerciseQuery } from "./exercise.query";
 import { getExerciseById, getExercises } from "./exercise.service";
 import { listResponse, successResponse } from "../../shared/http/api-response";
-import { mapExercise } from "./exercise.mapper";
+ 
 
 export async function getExercisesController(req: Request, res: Response) {
   const query = parseExerciseQuery(req.query);
