@@ -9,10 +9,7 @@ const server = app.listen(PORT, () => {
   console.log(`API running on http://localhost:${PORT}`);
 });
 
-app.listen(PORT, () => {
-  console.log(`API running on http://localhost:${PORT}`);
-});
-
+ 
 process.on("SIGINT", async () => {
   await prisma.$disconnect();
   server.close();
