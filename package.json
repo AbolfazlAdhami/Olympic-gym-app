@@ -2,17 +2,23 @@
   "name": "gym-app",
   "version": "1.0.0",
   "private": true,
-  "description": "Self-hosted bodybuilding and gym application",
   "workspaces": [
-    "apps/api",
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=apps/api",
-    "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces"
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
-  "engines": {
-    "node": ">=20"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbolfazlAdhami/Olympic-gym-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AbolfazlAdhami/Olympic-gym-app/issues"
+  },
+  "homepage": "https://github.com/AbolfazlAdhami/Olympic-gym-app#readme"
 }
