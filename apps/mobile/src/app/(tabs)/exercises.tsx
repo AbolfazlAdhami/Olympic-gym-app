@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View, ScrollView } from "react-native";
 import { Image } from "expo-image";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +7,19 @@ import { CATEGORY_LABELS, EQUIPMENT_LABELS, LEVEL_LABELS } from "@gym-app/shared
 import { getDatabase } from "../../database/client";
 import { theme } from "../../theme/tokens";
 import { useRouter } from "expo-router";
+
+type CategoryFilter = "all" | keyof typeof CATEGORY_LABELS;
+
+const CATEGORY_FILTERS: readonly { value: CategoryFilter; label: string }[] = [
+  { value: "all", label: "همه" },
+  { value: "strength", label: CATEGORY_LABELS.strength },
+  { value: "stretching", label: CATEGORY_LABELS.stretching },
+  { value: "plyometrics", label: CATEGORY_LABELS.plyometrics },
+  { value: "strongman", label: CATEGORY_LABELS.strongman },
+  { value: "powerlifting", label: CATEGORY_LABELS.powerlifting },
+  { value: "cardio", label: CATEGORY_LABELS.cardio },
+  { value: "olympic weightlifting", label: CATEGORY_LABELS["olympic weightlifting"] },
+];
 
 interface ExerciseDatabaseRow {
   id: string;
@@ -131,6 +144,7 @@ export default function ExercisesScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
 
   useEffect(() => {
     let isMounted = true;
@@ -181,16 +195,14 @@ export default function ExercisesScreen() {
   const filteredExercises = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
 
-    if (normalizedSearch.length === 0) {
-      return exercises;
-    }
-
     return exercises.filter((exercise) => {
-      const category = translatedLabel(CATEGORY_LABELS, exercise.category, "").toLocaleLowerCase();
+      const categoryLabel = translatedLabel(CATEGORY_LABELS, exercise.category, "").toLocaleLowerCase();
+      const matchesSearch = normalizedSearch.length === 0 || exercise.name.toLocaleLowerCase().includes(normalizedSearch) || categoryLabel.includes(normalizedSearch);
+      const matchesCategory = selectedCategory === "all" || exercise.category === selectedCategory;
 
-      return exercise.name.toLocaleLowerCase().includes(normalizedSearch) || category.includes(normalizedSearch);
+      return matchesSearch && matchesCategory;
     });
-  }, [exercises, search]);
+  }, [exercises, search, selectedCategory]);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -211,7 +223,25 @@ export default function ExercisesScreen() {
           textAlign="right"
           value={search}
         />
+        <View>
+          <ScrollView contentContainerStyle={styles.categoryFilters} horizontal showsHorizontalScrollIndicator={false}>
+            {CATEGORY_FILTERS.map((filter) => {
+              const isSelected = selectedCategory === filter.value;
 
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  key={filter.value}
+                  onPress={() => setSelectedCategory(filter.value)}
+                  style={[styles.categoryFilter, isSelected && styles.categoryFilterSelected]}
+                >
+                  <Text style={[styles.categoryFilterText, isSelected && styles.categoryFilterTextSelected]}>{filter.label}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
         {isLoading ? (
           <View style={styles.stateContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -406,5 +436,33 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontFamily: "Vazirmatn_600SemiBold",
     fontSize: theme.typography.small.fontSize,
+  },
+
+  categoryFilters: {
+    flexDirection: "row-reverse",
+    paddingBottom: theme.spacing.md,
+  },
+  categoryFilter: {
+    minHeight: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface,
+  },
+  categoryFilterSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
+  },
+  categoryFilterText: {
+    color: theme.colors.textMuted,
+    fontFamily: "Vazirmatn_500Medium",
+    fontSize: theme.typography.caption.fontSize,
+  },
+  categoryFilterTextSelected: {
+    color: theme.colors.background,
   },
 });
