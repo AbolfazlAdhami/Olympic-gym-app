@@ -21,6 +21,15 @@ const CATEGORY_FILTERS: readonly { value: CategoryFilter; label: string }[] = [
   { value: "olympic weightlifting", label: CATEGORY_LABELS["olympic weightlifting"] },
 ];
 
+type LevelFilter = "all" | keyof typeof LEVEL_LABELS;
+
+const LEVEL_FILTERS: readonly { value: LevelFilter; label: string }[] = [
+  { value: "all", label: "همهٔ سطح‌ها" },
+  { value: "beginner", label: LEVEL_LABELS.beginner },
+  { value: "intermediate", label: LEVEL_LABELS.intermediate },
+  { value: "expert", label: LEVEL_LABELS.expert },
+];
+
 interface ExerciseDatabaseRow {
   id: string;
   name: string;
@@ -145,6 +154,7 @@ export default function ExercisesScreen() {
   const [hasError, setHasError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
+  const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("all");
 
   useEffect(() => {
     let isMounted = true;
@@ -200,9 +210,10 @@ export default function ExercisesScreen() {
       const matchesSearch = normalizedSearch.length === 0 || exercise.name.toLocaleLowerCase().includes(normalizedSearch) || categoryLabel.includes(normalizedSearch);
       const matchesCategory = selectedCategory === "all" || exercise.category === selectedCategory;
 
-      return matchesSearch && matchesCategory;
+      const matchesLevel = selectedLevel === "all" || exercise.level === selectedLevel;
+      return matchesSearch && matchesCategory && matchesLevel;
     });
-  }, [exercises, search, selectedCategory]);
+  }, [exercises, search, selectedCategory, selectedLevel]);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -234,6 +245,23 @@ export default function ExercisesScreen() {
                   accessibilityState={{ selected: isSelected }}
                   key={filter.value}
                   onPress={() => setSelectedCategory(filter.value)}
+                  style={[styles.categoryFilter, isSelected && styles.categoryFilterSelected]}
+                >
+                  <Text style={[styles.categoryFilterText, isSelected && styles.categoryFilterTextSelected]}>{filter.label}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+          <ScrollView contentContainerStyle={styles.categoryFilters} horizontal showsHorizontalScrollIndicator={false}>
+            {LEVEL_FILTERS.map((filter) => {
+              const isSelected = selectedLevel === filter.value;
+
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  key={filter.value}
+                  onPress={() => setSelectedLevel(filter.value)}
                   style={[styles.categoryFilter, isSelected && styles.categoryFilterSelected]}
                 >
                   <Text style={[styles.categoryFilterText, isSelected && styles.categoryFilterTextSelected]}>{filter.label}</Text>
