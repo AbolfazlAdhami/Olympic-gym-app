@@ -325,6 +325,18 @@ export default function ExercisesScreen() {
           <View style={styles.stateContainer}>
             <Text style={styles.stateTitle}>تمرینی پیدا نشد</Text>
             <Text style={styles.stateText}>عبارت جست‌وجو را تغییر دهید و دوباره امتحان کنید.</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setSearch("");
+                setSelectedCategory("all");
+                setSelectedLevel("all");
+                setSelectedEquipment("all");
+              }}
+              style={styles.retryButton}
+            >
+              <Text style={styles.retryButtonText}>پاک‌کردن جست‌وجو و فیلترها</Text>
+            </Pressable>
           </View>
         ) : (
           <FlatList

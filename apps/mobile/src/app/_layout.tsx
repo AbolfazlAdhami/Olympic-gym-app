@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFonts, Vazirmatn_400Regular, Vazirmatn_500Medium, Vazirmatn_600SemiBold, Vazirmatn_700Bold } from "@expo-google-fonts/vazirmatn";
-import { Stack } from "expo-router";
+import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { initializeAppDatabase } from "../database/bootstrap";
 import { theme } from "../theme/tokens";
@@ -54,6 +54,20 @@ export default function RootLayout() {
 
   const fontReady = fontsLoaded || fontError !== null;
   const appReady = bootstrapState === "ready" && fontReady;
+
+  export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+    console.error("An unexpected screen error occurred.", error);
+
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>مشکلی پیش آمد</Text>
+        <Text style={styles.errorDescription}>صفحه نتوانست بارگذاری شود. دوباره تلاش کنید.</Text>
+        <Pressable accessibilityRole="button" onPress={() => void retry()} style={styles.button}>
+          <Text style={styles.buttonText}>تلاش دوباره</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -152,6 +166,28 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontFamily: "Vazirmatn_500Medium",
     fontSize: theme.typography.small.fontSize,
+    writingDirection: "rtl",
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing.xl,
+    backgroundColor: theme.colors.background,
+  },
+  errorTitle: {
+    color: theme.colors.text,
+    fontFamily: "Vazirmatn_700Bold",
+    fontSize: theme.typography.subtitle.fontSize,
+    textAlign: "center",
+    writingDirection: "rtl",
+  },
+  errorDescription: {
+    marginTop: theme.spacing.sm,
+    color: theme.colors.textMuted,
+    fontFamily: "Vazirmatn_400Regular",
+    fontSize: theme.typography.small.fontSize,
+    textAlign: "center",
     writingDirection: "rtl",
   },
 });
