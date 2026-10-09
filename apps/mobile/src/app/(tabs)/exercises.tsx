@@ -30,6 +30,24 @@ const LEVEL_FILTERS: readonly { value: LevelFilter; label: string }[] = [
   { value: "expert", label: LEVEL_LABELS.expert },
 ];
 
+type EquipmentFilter = "all" | keyof typeof EQUIPMENT_LABELS;
+
+const EQUIPMENT_FILTERS: readonly { value: EquipmentFilter; label: string }[] = [
+  { value: "all", label: "همهٔ تجهیزات" },
+  { value: "machine", label: EQUIPMENT_LABELS.machine },
+  { value: "cable", label: EQUIPMENT_LABELS.cable },
+  { value: "barbell", label: EQUIPMENT_LABELS.barbell },
+  { value: "dumbbell", label: EQUIPMENT_LABELS.dumbbell },
+  { value: "body only", label: EQUIPMENT_LABELS["body only"] },
+  { value: "bands", label: EQUIPMENT_LABELS.bands },
+  { value: "medicine ball", label: EQUIPMENT_LABELS["medicine ball"] },
+  { value: "kettlebells", label: EQUIPMENT_LABELS.kettlebells },
+  { value: "foam roll", label: EQUIPMENT_LABELS["foam roll"] },
+  { value: "e-z curl bar", label: EQUIPMENT_LABELS["e-z curl bar"] },
+  { value: "exercise ball", label: EQUIPMENT_LABELS["exercise ball"] },
+  { value: "other", label: EQUIPMENT_LABELS.other },
+];
+
 interface ExerciseDatabaseRow {
   id: string;
   name: string;
@@ -155,6 +173,7 @@ export default function ExercisesScreen() {
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
   const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("all");
+  const [selectedEquipment, setSelectedEquipment] = useState<EquipmentFilter>("all");
 
   useEffect(() => {
     let isMounted = true;
@@ -211,9 +230,11 @@ export default function ExercisesScreen() {
       const matchesCategory = selectedCategory === "all" || exercise.category === selectedCategory;
 
       const matchesLevel = selectedLevel === "all" || exercise.level === selectedLevel;
-      return matchesSearch && matchesCategory && matchesLevel;
+      const matchesEquipment = selectedEquipment === "all" || exercise.equipment === selectedEquipment;
+
+      return matchesSearch && matchesCategory && matchesLevel && matchesEquipment;
     });
-  }, [exercises, search, selectedCategory, selectedLevel]);
+  }, [exercises, search, selectedCategory, selectedLevel, selectedEquipment]);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -245,6 +266,23 @@ export default function ExercisesScreen() {
                   accessibilityState={{ selected: isSelected }}
                   key={filter.value}
                   onPress={() => setSelectedCategory(filter.value)}
+                  style={[styles.categoryFilter, isSelected && styles.categoryFilterSelected]}
+                >
+                  <Text style={[styles.categoryFilterText, isSelected && styles.categoryFilterTextSelected]}>{filter.label}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+          <ScrollView contentContainerStyle={styles.categoryFilters} horizontal showsHorizontalScrollIndicator={false}>
+            {EQUIPMENT_FILTERS.map((filter) => {
+              const isSelected = selectedEquipment === filter.value;
+
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  key={filter.value}
+                  onPress={() => setSelectedEquipment(filter.value)}
                   style={[styles.categoryFilter, isSelected && styles.categoryFilterSelected]}
                 >
                   <Text style={[styles.categoryFilterText, isSelected && styles.categoryFilterTextSelected]}>{filter.label}</Text>
