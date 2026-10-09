@@ -1,9 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image } from "expo-image";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CATEGORY_LABELS, EQUIPMENT_LABELS, LEVEL_LABELS } from "@gym-app/shared";
 import { getDatabase } from "../../database/client";
 import { theme } from "../../theme/tokens";
+
+interface ExerciseDatabaseRow {
+  id: string;
+  name: string;
+  category: string;
+  level: string;
+  equipment: string | null;
+  images_json: string;
+}
 
 interface ExerciseListItem {
   id: string;
@@ -11,6 +22,11 @@ interface ExerciseListItem {
   category: string;
   level: string;
   equipment: string | null;
+  imageUrl: string | null;
+}
+
+interface ExerciseCardProps {
+  item: ExerciseListItem;
 }
 
 function translatedLabel(labels: Readonly<Record<string, string>>, value: string | null, fallback: string): string {
@@ -19,6 +35,86 @@ function translatedLabel(labels: Readonly<Record<string, string>>, value: string
   }
 
   return labels[value] ?? value;
+}
+
+const EXERCISE_IMAGE_BASE_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
+
+function resolveImageUrl(imagePath: string): string | null {
+  const trimmedPath = imagePath.trim();
+
+  if (/^https?:\/\//i.test(trimmedPath)) {
+    return trimmedPath;
+  }
+
+  const normalizedPath = trimmedPath.replace(/\\/g, "/").replace(/^\.\/+/, "");
+  const pathSegments = normalizedPath.split("/");
+
+  if (normalizedPath.length === 0 || normalizedPath.startsWith("/") || pathSegments.some((segment) => segment.length === 0 || segment === "." || segment === "..")) {
+    return null;
+  }
+
+  const encodedPath = pathSegments.map(encodeURIComponent).join("/");
+  return `${EXERCISE_IMAGE_BASE_URL}${encodedPath}`;
+}
+
+function firstImageUrl(imagesJson: string): string | null {
+  try {
+    const parsedImages: unknown = JSON.parse(imagesJson);
+
+    if (!Array.isArray(parsedImages)) {
+      return null;
+    }
+
+    for (const imagePath of parsedImages) {
+      if (typeof imagePath !== "string") {
+        continue;
+      }
+
+      const imageUrl = resolveImageUrl(imagePath);
+
+      if (imageUrl !== null) {
+        return imageUrl;
+      }
+    }
+  } catch (error: unknown) {
+    console.warn("An exercise image list could not be parsed.", error);
+  }
+
+  return null;
+}
+
+function ExerciseCard({ item }: ExerciseCardProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  return (
+    <View style={styles.exerciseCard}>
+      {item.imageUrl !== null && !imageFailed ? (
+        <Image accessibilityLabel={`تصویر ${item.name}`} cachePolicy="disk" contentFit="cover" onError={() => setImageFailed(true)} source={{ uri: item.imageUrl }} style={styles.exerciseImage} transition={180} />
+      ) : (
+        <View accessibilityLabel="تصویر تمرین در دسترس نیست" style={styles.imageFallback}>
+          <Ionicons color={theme.colors.primary} name="barbell-outline" size={26} />
+        </View>
+      )}
+
+      <View style={styles.exerciseContent}>
+        <Text numberOfLines={2} style={styles.exerciseName}>
+          {item.name}
+        </Text>
+
+        <View style={styles.metadataRow}>
+          <Text numberOfLines={1} style={styles.metadataText}>
+            {translatedLabel(CATEGORY_LABELS, item.category, "دسته‌بندی دیگر")}
+          </Text>
+          <View style={styles.metadataDot} />
+          <Text style={styles.metadataText}>{translatedLabel(LEVEL_LABELS, item.level, "سطح نامشخص")}</Text>
+        </View>
+
+        <Text numberOfLines={1} style={styles.equipmentText}>
+          {translatedLabel(EQUIPMENT_LABELS, item.equipment, "بدون تجهیزات مشخص")}
+        </Text>
+      </View>
+    </View>
+  );
 }
 
 export default function ExercisesScreen() {
@@ -37,14 +133,22 @@ export default function ExercisesScreen() {
 
       try {
         const database = await getDatabase();
-        const rows = await database.getAllAsync<ExerciseListItem>(
-          `SELECT id, name, category, level, equipment
+        const rows = await database.getAllAsync<ExerciseDatabaseRow>(
+          `SELECT id, name, category, level, equipment, images_json
            FROM exercises
            ORDER BY name COLLATE NOCASE`,
         );
 
+        const items: ExerciseListItem[] = rows.map((row) => ({
+          id: row.id,
+          name: row.name,
+          category: row.category,
+          level: row.level,
+          equipment: row.equipment,
+          imageUrl: firstImageUrl(row.images_json),
+        }));
         if (isMounted) {
-          setExercises(rows);
+          setExercises(items);
         }
       } catch (error: unknown) {
         console.error("Exercise list could not be loaded.", error);
@@ -125,18 +229,7 @@ export default function ExercisesScreen() {
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <View style={styles.exerciseCard}>
-                <View style={styles.exerciseCardAccent} />
-                <Text style={styles.exerciseName}>{item.name}</Text>
-                <View style={styles.metadataRow}>
-                  <Text style={styles.metadataText}>{translatedLabel(CATEGORY_LABELS, item.category, "دسته‌بندی دیگر")}</Text>
-                  <View style={styles.metadataDot} />
-                  <Text style={styles.metadataText}>{translatedLabel(LEVEL_LABELS, item.level, "سطح نامشخص")}</Text>
-                </View>
-                <Text style={styles.equipmentText}>{translatedLabel(EQUIPMENT_LABELS, item.equipment, "بدون تجهیزات مشخص")}</Text>
-              </View>
-            )}
+            renderItem={({ item }) => <ExerciseCard item={item} />}
           />
         )}
       </View>
@@ -199,37 +292,52 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.xl,
   },
   exerciseCard: {
-    overflow: "hidden",
+    flexDirection: "row-reverse",
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
-    padding: theme.spacing.md,
+    padding: theme.spacing.sm,
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.surface,
   },
-  exerciseCardAccent: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 3,
-    height: "100%",
-    backgroundColor: theme.colors.primary,
+  exerciseImage: {
+    width: 82,
+    height: 82,
+    marginLeft: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surfaceRaised,
+  },
+  imageFallback: {
+    width: 82,
+    height: 82,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surfaceRaised,
+  },
+  exerciseContent: {
+    flex: 1,
+    alignItems: "flex-end",
   },
   exerciseName: {
+    alignSelf: "stretch",
     color: theme.colors.text,
     fontFamily: "Vazirmatn_600SemiBold",
-    fontSize: theme.typography.body.fontSize,
-    lineHeight: theme.typography.body.lineHeight,
+    fontSize: theme.typography.small.fontSize,
+    lineHeight: theme.typography.small.lineHeight,
     textAlign: "right",
     writingDirection: "rtl",
   },
   metadataRow: {
-    flexDirection: "row",
+    flexDirection: "row-reverse",
     alignItems: "center",
-    justifyContent: "flex-end",
+    alignSelf: "stretch",
     marginTop: theme.spacing.xs,
   },
   metadataText: {
+    flexShrink: 1,
     color: theme.colors.textMuted,
     fontFamily: "Vazirmatn_400Regular",
     fontSize: theme.typography.caption.fontSize,
@@ -243,6 +351,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   equipmentText: {
+    alignSelf: "stretch",
     marginTop: theme.spacing.xs,
     color: theme.colors.textSubtle,
     fontFamily: "Vazirmatn_400Regular",
