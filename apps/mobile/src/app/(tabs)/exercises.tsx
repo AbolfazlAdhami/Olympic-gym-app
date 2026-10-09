@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CATEGORY_LABELS, EQUIPMENT_LABELS, LEVEL_LABELS } from "@gym-app/shared";
 import { getDatabase } from "../../database/client";
 import { theme } from "../../theme/tokens";
+import { useRouter } from "expo-router";
 
 interface ExerciseDatabaseRow {
   id: string;
@@ -84,10 +85,17 @@ function firstImageUrl(imagesJson: string): string | null {
 }
 
 function ExerciseCard({ item }: ExerciseCardProps) {
+  const router = useRouter();
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
-    <View style={styles.exerciseCard}>
+    <Pressable
+      accessibilityHint="نمایش جزئیات و نحوهٔ اجرای تمرین"
+      accessibilityLabel={`جزئیات تمرین ${item.name}`}
+      accessibilityRole="button"
+      onPress={() => router.push({ pathname: "/exercise/[id]", params: { id: item.id } })}
+      style={({ pressed }) => [styles.exerciseCard, pressed && styles.exerciseCardPressed]}
+    >
       {item.imageUrl !== null && !imageFailed ? (
         <Image accessibilityLabel={`تصویر ${item.name}`} cachePolicy="disk" contentFit="cover" onError={() => setImageFailed(true)} source={{ uri: item.imageUrl }} style={styles.exerciseImage} transition={180} />
       ) : (
@@ -113,7 +121,7 @@ function ExerciseCard({ item }: ExerciseCardProps) {
           {translatedLabel(EQUIPMENT_LABELS, item.equipment, "بدون تجهیزات مشخص")}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -300,6 +308,10 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.surface,
+  },
+  exerciseCardPressed: {
+    borderColor: theme.colors.primary,
+    opacity: 0.82,
   },
   exerciseImage: {
     width: 82,
