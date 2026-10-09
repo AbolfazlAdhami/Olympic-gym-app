@@ -8,6 +8,19 @@ import { theme } from "../theme/tokens";
 
 type BootstrapState = "loading" | "ready" | "error";
 
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  console.error("An unexpected screen error occurred.", error);
+
+  return (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorTitle}>مشکلی پیش آمد</Text>
+      <Text style={styles.errorDescription}>صفحه نتوانست بارگذاری شود. دوباره تلاش کنید.</Text>
+      <Pressable accessibilityRole="button" onPress={() => void retry()} style={styles.button}>
+        <Text style={styles.buttonText}>تلاش دوباره</Text>
+      </Pressable>
+    </View>
+  );
+}
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     Vazirmatn_400Regular,
@@ -54,20 +67,6 @@ export default function RootLayout() {
 
   const fontReady = fontsLoaded || fontError !== null;
   const appReady = bootstrapState === "ready" && fontReady;
-
-  export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
-    console.error("An unexpected screen error occurred.", error);
-
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>مشکلی پیش آمد</Text>
-        <Text style={styles.errorDescription}>صفحه نتوانست بارگذاری شود. دوباره تلاش کنید.</Text>
-        <Pressable accessibilityRole="button" onPress={() => void retry()} style={styles.button}>
-          <Text style={styles.buttonText}>تلاش دوباره</Text>
-        </Pressable>
-      </View>
-    );
-  }
 
   return (
     <>
