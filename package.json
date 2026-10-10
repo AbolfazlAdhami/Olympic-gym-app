@@ -28,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/AbolfazlAdhami/Olympic-gym-app/issues"
   },
-  "homepage": "https://github.com/AbolfazlAdhami/Olympic-gym-app#readme"
+  "homepage": "https://github.com/AbolfazlAdhami/Olympic-gym-app#readme",
+  "devDependencies": {
+    "@types/react": "~19.1.0"
+  }
 }
