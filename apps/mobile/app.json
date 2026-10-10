@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Olympic",
-    "scheme": "gym-app",
-    "slug": "gym-app",
+    "scheme": "olympic-gym",
+    "slug": "olympic-gym",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -22,7 +22,8 @@
         "backgroundColor": "#101310"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.abolfazl.olympicgym"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +31,17 @@
     "experiments": {
       "typedRoutes": true
     },
-    "plugins": ["expo-sqlite", "expo-router", "expo-font"]
+    "plugins": [
+      "expo-sqlite",
+      "expo-router",
+      "expo-font"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3f37caf6-a0d1-4540-8671-e4cbce1a995f"
+      }
+    },
+    "owner": "abolfazladhami82"
   }
 }
