@@ -7,27 +7,21 @@ import { EQUIPMENT_VALUES, EXERCISE_CATEGORIES } from "@gym-app/shared";
 import type { Equipment, ExerciseCategory } from "@gym-app/shared";
 import { getDatabase } from "../../database/client";
 import { listExercises, type ExerciseListItem as RepositoryExerciseListItem } from "../../database/exerciseRepository";
-import { resolveExerciseMediaAsset } from "../../utils/exerciseMedia";
+import { resolveExerciseMediaUrl } from "../../utils/exerciseMedia";
 import { theme } from "../../theme/tokens";
 import { useRouter } from "expo-router";
 import { getExerciseLabel } from "../../types/exercise-labels.fa";
 
 type CategoryFilter = "all" | ExerciseCategory;
 
-const CATEGORY_FILTERS: readonly { value: CategoryFilter; label: string }[] = [
-  { value: "all", label: "همه" },
-  ...EXERCISE_CATEGORIES.map((value) => ({ value, label: getExerciseLabel("category", value) })),
-];
+const CATEGORY_FILTERS: readonly { value: CategoryFilter; label: string }[] = [{ value: "all", label: "همه" }, ...EXERCISE_CATEGORIES.map((value) => ({ value, label: getExerciseLabel("category", value) }))];
 
 type EquipmentFilter = "all" | Equipment;
 
-const EQUIPMENT_FILTERS: readonly { value: EquipmentFilter; label: string }[] = [
-  { value: "all", label: "همهٔ تجهیزات" },
-  ...EQUIPMENT_VALUES.map((value) => ({ value, label: getExerciseLabel("equipment", value) })),
-];
+const EQUIPMENT_FILTERS: readonly { value: EquipmentFilter; label: string }[] = [{ value: "all", label: "همهٔ تجهیزات" }, ...EQUIPMENT_VALUES.map((value) => ({ value, label: getExerciseLabel("equipment", value) }))];
 
 interface ExerciseListItem extends RepositoryExerciseListItem {
-  imageAsset: number | null;
+  imageAsset: string | null;
 }
 
 interface ExerciseCardProps {
@@ -99,7 +93,7 @@ export default function ExercisesScreen() {
 
         const items: ExerciseListItem[] = rows.map((row) => ({
           ...row,
-          imageAsset: resolveExerciseMediaAsset(row.image),
+          imageAsset: resolveExerciseMediaUrl(row.image),
         }));
         if (isMounted) {
           setExercises(items);
@@ -139,7 +133,9 @@ export default function ExercisesScreen() {
         getExerciseLabel("target", exercise.target),
         getExerciseLabel("muscle", exercise.muscleGroup),
         getExerciseLabel("equipment", exercise.equipment),
-      ].join(" ").toLocaleLowerCase();
+      ]
+        .join(" ")
+        .toLocaleLowerCase();
       const matchesSearch = normalizedSearch.length === 0 || searchableValues.includes(normalizedSearch);
       const matchesCategory = selectedCategory === "all" || exercise.category === selectedCategory;
 
@@ -155,7 +151,6 @@ export default function ExercisesScreen() {
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>کتابخانهٔ آفلاین</Text>
           <Text style={styles.title}>تمرین‌ها</Text>
           <Text style={styles.subtitle}>حرکت موردنظرت را در میان تمرین‌های فارسی پیدا کن.</Text>
         </View>

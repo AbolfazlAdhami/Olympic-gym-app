@@ -2,7 +2,7 @@
 
 ## Product direction
 
-Refactor and complete the existing Persian-first Expo fitness app. Keep exercise text and structure usable offline in device SQLite, with image and GIF media loaded from the paths in the current dataset. Store stable English enum keys and display Persian labels.
+Refactor and complete the existing Persian-first Expo fitness app. Keep exercise text and structure usable offline in device SQLite, and load image and GIF media from the dataset source repository. Store stable English enum keys and display Persian labels.
 
 ## Current repository baseline
 
@@ -60,8 +60,8 @@ Scope:
 1. Read exercise list and detail data from SQLite repositories rather than parsing JSON in screens.
 2. Add debounced search and composable enum/muscle filters using Persian labels while retaining English keys in storage.
 3. Use performant virtualized lists appropriate to the installed Expo/RN versions.
-4. Resolve dataset image and GIF paths to bundled local assets and show them with `expo-image`.
-5. Keep core text and structure functional offline.
+4. Resolve dataset image and GIF paths to source-repository URLs and show them with `expo-image`.
+5. Keep core text and structure functional offline; media may require an internet connection before it is cached.
 
 Acceptance criteria: list/detail/search/filter screens use local database data; image failure does not block exercise content; large datasets remain responsive.
 
@@ -126,6 +126,12 @@ Acceptance criteria: production configuration is internally consistent; document
 - Updated exercise media resolution to find image and GIF files in `apps/mobile/assets/images` and `apps/mobile/assets/videos` using Metro asset contexts.
 - Exercise list and detail screens now render bundled asset references, so the media does not require a network connection.
 - Confirmed the assets directory contains one image and one GIF for each of the 1,324 dataset exercises. TypeScript typecheck and `git diff --check` pass.
+
+### 2026-10-23 — Load exercise media from the dataset source
+
+- Replaced Metro asset contexts with validated URLs to the public `hasaneyldrm/exercises-dataset` image and video folders.
+- Added the repository-root `.easignore` to keep exercise images, GIFs, source-only datasets, and translation tooling out of the EAS archive while retaining the local SQLite dataset and shared package.
+- Media now requires an internet connection for first load; exercise text and structure remain available offline. TypeScript typecheck and ignore-pattern checks pass.
 - TypeScript validation and `git diff --check` passed.
 - At the time of this entry, the label map remained unused per the user's earlier English-display choice; the later Persian-label request supersedes it.
 

@@ -1,0 +1,27 @@
+# Keep the app's Git ignore rules here because .easignore replaces .gitignore.
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+*.pem
+.env*.local
+*.tsbuildinfo
+/ios/
+/android/
+
+# Exercise media is loaded from the public dataset repository at runtime.
+/assets/images/
+/assets/videos/

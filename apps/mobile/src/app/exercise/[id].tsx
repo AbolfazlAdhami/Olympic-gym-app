@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getDatabase } from "../../database/client";
 import { addExerciseToFavorites, getExerciseById, isExerciseFavorite, removeExerciseFromFavorites } from "../../database/exerciseRepository";
 import { getActiveProfile } from "../../database/profileRepository";
-import { resolveExerciseMediaAsset } from "../../utils/exerciseMedia";
+import { resolveExerciseMediaUrl } from "../../utils/exerciseMedia";
 import { theme } from "../../theme/tokens";
 import { getExerciseLabel } from "../../types/exercise-labels.fa";
 
@@ -18,8 +18,8 @@ interface ExerciseDetail {
   bodyPart: string;
   equipment: string;
   instructions: string[];
-  imageAsset: number | null;
-  animationAsset: number | null;
+  imageAsset: string | null;
+  animationAsset: string | null;
   muscleGroup: string;
   secondaryMuscles: string[];
   target: string;
@@ -69,8 +69,8 @@ export default function ExerciseDetailScreen() {
           bodyPart: exercise.bodyPart,
           equipment: exercise.equipment,
           instructions: exercise.instructions,
-          imageAsset: resolveExerciseMediaAsset(exercise.image),
-          animationAsset: resolveExerciseMediaAsset(exercise.gifUrl),
+          imageAsset: resolveExerciseMediaUrl(exercise.image),
+          animationAsset: resolveExerciseMediaUrl(exercise.gifUrl),
           muscleGroup: exercise.muscleGroup,
           secondaryMuscles: exercise.secondaryMuscles,
           target: exercise.target,

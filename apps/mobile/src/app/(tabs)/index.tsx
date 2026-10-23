@@ -62,9 +62,7 @@ export default function HomeScreen() {
         ),
       ]);
 
-      const validCategories = categoryRows.flatMap((row): CategorySummary[] =>
-        isExerciseCategory(row.category) ? [{ category: row.category, count: row.count }] : [],
-      );
+      const validCategories = categoryRows.flatMap((row): CategorySummary[] => (isExerciseCategory(row.category) ? [{ category: row.category, count: row.count }] : []));
 
       setExerciseCount(countRow?.count ?? 0);
       setCategoryCount(categoryTotalRow?.count ?? 0);
@@ -94,10 +92,10 @@ export default function HomeScreen() {
             <Text style={styles.brandName}>OLYMPIC</Text>
             <Text style={styles.brandCaption}>تمرین، با برنامه</Text>
           </View>
-          <View style={styles.offlineBadge}>
+          {/* <View style={styles.offlineBadge}>
             <View style={styles.offlineDot} />
             <Text style={styles.offlineText}>آفلاین</Text>
-          </View>
+          </View> */}
         </View>
 
         <View style={styles.hero}>
@@ -107,33 +105,21 @@ export default function HomeScreen() {
           <Text style={styles.eyebrow}>کتابخانهٔ تمرین فارسی</Text>
           <Text style={styles.headline}>تمرین بعدی‌ات{`\n`}از اینجا شروع می‌شود.</Text>
           <Text style={styles.description}>حرکت‌ها را پیدا کن، روش اجرای درست را ببین و با آگاهی تمرین کن.</Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={openExercises}
-            style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-          >
-            <Text style={styles.primaryButtonText}>رفتن به تمرین‌ها</Text>
+          <Pressable accessibilityRole="button" onPress={openExercises} style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}>
             <Ionicons color={theme.colors.background} name="arrow-back" size={18} />
+            <Text style={styles.primaryButtonText}>رفتن به تمرین‌ها</Text>
           </Pressable>
         </View>
 
         <View accessibilityLabel="خلاصهٔ کتابخانه" style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>حرکت در کتابخانه</Text>
-            {isLoading ? (
-              <ActivityIndicator color={theme.colors.primary} size="small" />
-            ) : (
-              <Text style={styles.statValue}>{hasError ? "—" : (exerciseCount ?? 0).toLocaleString("en-US")}</Text>
-            )}
+            {isLoading ? <ActivityIndicator color={theme.colors.primary} size="small" /> : <Text style={styles.statValue}>{hasError ? "—" : (exerciseCount ?? 0).toLocaleString("en-US")}</Text>}
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>دستهٔ فعال</Text>
-            {isLoading ? (
-              <ActivityIndicator color={theme.colors.primary} size="small" />
-            ) : (
-              <Text style={styles.statValue}>{hasError ? "—" : String(categoryCount ?? 0).padStart(2, "0")}</Text>
-            )}
+            {isLoading ? <ActivityIndicator color={theme.colors.primary} size="small" /> : <Text style={styles.statValue}>{hasError ? "—" : String(categoryCount ?? 0).padStart(2, "0")}</Text>}
           </View>
         </View>
 
@@ -143,8 +129,8 @@ export default function HomeScreen() {
             <Text style={styles.sectionSubtitle}>بر اساس تعداد حرکت‌های ثبت‌شده</Text>
           </View>
           <Pressable accessibilityRole="button" onPress={openExercises} style={styles.seeAllButton}>
-            <Text style={styles.seeAllText}>همه</Text>
             <Ionicons color={theme.colors.primary} name="chevron-back" size={15} />
+            <Text style={styles.seeAllText}>همه</Text>
           </Pressable>
         </View>
 
@@ -169,7 +155,9 @@ export default function HomeScreen() {
                   </View>
                   <Text style={styles.categoryIndex}>{String(index + 1).padStart(2, "0")}</Text>
                 </View>
-                <Text numberOfLines={1} style={styles.categoryTitle}>{getExerciseLabel("category", item.category)}</Text>
+                <Text numberOfLines={1} style={styles.categoryTitle}>
+                  {getExerciseLabel("category", item.category)}
+                </Text>
                 <Text style={styles.categoryCount}>{item.count.toLocaleString("en-US")} حرکت</Text>
               </View>
             ))}
@@ -347,7 +335,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.border,
   },
   sectionHeader: {
-    flexDirection: "row",
+    flexDirection: "row-reverse",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: theme.spacing.md,

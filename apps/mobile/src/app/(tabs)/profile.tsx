@@ -8,12 +8,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getDatabase } from "../../database/client";
 import { listFavoriteExercises, removeExerciseFromFavorites, type ExerciseListItem } from "../../database/exerciseRepository";
 import { deleteLocalProfile, getActiveProfile, type LocalProfile } from "../../database/profileRepository";
-import { resolveExerciseMediaAsset } from "../../utils/exerciseMedia";
+import { resolveExerciseMediaUrl } from "../../utils/exerciseMedia";
 import { getExerciseLabel } from "../../types/exercise-labels.fa";
 import { theme } from "../../theme/tokens";
 
 interface FavoriteExercise extends ExerciseListItem {
-  imageAsset: number | null;
+  imageAsset: string | null;
 }
 
 interface FavoriteRowProps {
@@ -26,13 +26,7 @@ interface FavoriteRowProps {
 const FavoriteRow = memo(function FavoriteRow({ item, onOpen, onRemove, removing }: FavoriteRowProps) {
   return (
     <View style={styles.favoriteCard}>
-      <Pressable
-        accessibilityHint="نمایش جزئیات حرکت"
-        accessibilityLabel={`نمایش حرکت ${item.name}`}
-        accessibilityRole="button"
-        onPress={() => onOpen(item.id)}
-        style={styles.favoriteMain}
-      >
+      <Pressable accessibilityHint="نمایش جزئیات حرکت" accessibilityLabel={`نمایش حرکت ${item.name}`} accessibilityRole="button" onPress={() => onOpen(item.id)} style={styles.favoriteMain}>
         {item.imageAsset !== null ? (
           <Image accessibilityLabel={`تصویر ${item.name}`} contentFit="cover" source={item.imageAsset} style={styles.favoriteImage} />
         ) : (
@@ -41,19 +35,15 @@ const FavoriteRow = memo(function FavoriteRow({ item, onOpen, onRemove, removing
           </View>
         )}
         <View style={styles.favoriteTextBlock}>
-          <Text numberOfLines={2} style={styles.favoriteTitle}>{item.name}</Text>
+          <Text numberOfLines={2} style={styles.favoriteTitle}>
+            {item.name}
+          </Text>
           <Text numberOfLines={1} style={styles.favoriteMetadata}>
             {getExerciseLabel("category", item.category)} · {getExerciseLabel("target", item.target)}
           </Text>
         </View>
       </Pressable>
-      <Pressable
-        accessibilityLabel={`حذف ${item.name} از علاقه‌مندی‌ها`}
-        accessibilityRole="button"
-        disabled={removing}
-        onPress={() => onRemove(item.id)}
-        style={styles.removeButton}
-      >
+      <Pressable accessibilityLabel={`حذف ${item.name} از علاقه‌مندی‌ها`} accessibilityRole="button" disabled={removing} onPress={() => onRemove(item.id)} style={styles.removeButton}>
         {removing ? <ActivityIndicator color={theme.colors.danger} size="small" /> : <Ionicons color={theme.colors.danger} name="heart-dislike-outline" size={20} />}
       </Pressable>
     </View>
@@ -90,7 +80,7 @@ export default function ProfileScreen() {
           const favoriteRows = await listFavoriteExercises(database, activeProfile.id);
           const favoriteItems: FavoriteExercise[] = favoriteRows.map((favorite) => ({
             ...favorite,
-            imageAsset: resolveExerciseMediaAsset(favorite.image),
+            imageAsset: resolveExerciseMediaUrl(favorite.image),
           }));
 
           if (isActive) {
@@ -118,31 +108,40 @@ export default function ProfileScreen() {
     }, [reloadKey, router]),
   );
 
-  const removeFavorite = useCallback(async (exerciseId: string): Promise<void> => {
-    if (profile === null) {
-      return;
-    }
+  const removeFavorite = useCallback(
+    async (exerciseId: string): Promise<void> => {
+      if (profile === null) {
+        return;
+      }
 
-    setRemovingId(exerciseId);
+      setRemovingId(exerciseId);
 
-    try {
-      const database = await getDatabase();
-      await removeExerciseFromFavorites(database, profile.id, exerciseId);
-      setFavorites((current) => current.filter((favorite) => favorite.id !== exerciseId));
-    } catch (error: unknown) {
-      console.error("Favorite exercise could not be removed.", error);
-      Alert.alert("حذف انجام نشد", "حرکت از علاقه‌مندی‌ها حذف نشد. دوباره تلاش کنید.");
-    } finally {
-      setRemovingId(null);
-    }
-  }, [profile]);
+      try {
+        const database = await getDatabase();
+        await removeExerciseFromFavorites(database, profile.id, exerciseId);
+        setFavorites((current) => current.filter((favorite) => favorite.id !== exerciseId));
+      } catch (error: unknown) {
+        console.error("Favorite exercise could not be removed.", error);
+        Alert.alert("حذف انجام نشد", "حرکت از علاقه‌مندی‌ها حذف نشد. دوباره تلاش کنید.");
+      } finally {
+        setRemovingId(null);
+      }
+    },
+    [profile],
+  );
 
-  const openExercise = useCallback((exerciseId: string): void => {
-    router.push({ pathname: "/exercise/[id]", params: { id: exerciseId } });
-  }, [router]);
-  const handleRemoveFavorite = useCallback((exerciseId: string): void => {
-    void removeFavorite(exerciseId);
-  }, [removeFavorite]);
+  const openExercise = useCallback(
+    (exerciseId: string): void => {
+      router.push({ pathname: "/exercise/[id]", params: { id: exerciseId } });
+    },
+    [router],
+  );
+  const handleRemoveFavorite = useCallback(
+    (exerciseId: string): void => {
+      void removeFavorite(exerciseId);
+    },
+    [removeFavorite],
+  );
 
   const deleteProfile = useCallback(async (): Promise<void> => {
     if (profile === null) {
@@ -168,14 +167,10 @@ export default function ProfileScreen() {
       return;
     }
 
-    Alert.alert(
-      "حذف پروفایل محلی؟",
-      "پروفایل و حرکت‌های موردعلاقهٔ این کاربر از این دستگاه حذف می‌شوند. سپس می‌توانی دوباره ثبت‌نام کنی.",
-      [
-        { text: "انصراف", style: "cancel" },
-        { text: "حذف پروفایل", style: "destructive", onPress: () => void deleteProfile() },
-      ],
-    );
+    Alert.alert("حذف پروفایل محلی؟", "پروفایل و حرکت‌های موردعلاقهٔ این کاربر از این دستگاه حذف می‌شوند. سپس می‌توانی دوباره ثبت‌نام کنی.", [
+      { text: "انصراف", style: "cancel" },
+      { text: "حذف پروفایل", style: "destructive", onPress: () => void deleteProfile() },
+    ]);
   }, [deleteProfile, isDeletingProfile, profile]);
 
   const openContactLink = useCallback(async (url: string, contactName: string): Promise<void> => {
@@ -187,14 +182,10 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  const renderFavorite = useCallback(({ item }: { item: FavoriteExercise }) => (
-    <FavoriteRow
-      item={item}
-      onOpen={openExercise}
-      onRemove={handleRemoveFavorite}
-      removing={removingId === item.id}
-    />
-  ), [handleRemoveFavorite, openExercise, removingId]);
+  const renderFavorite = useCallback(
+    ({ item }: { item: FavoriteExercise }) => <FavoriteRow item={item} onOpen={openExercise} onRemove={handleRemoveFavorite} removing={removingId === item.id} />,
+    [handleRemoveFavorite, openExercise, removingId],
+  );
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -224,8 +215,8 @@ export default function ProfileScreen() {
               <Text style={styles.emptyTitle}>هنوز حرکتی ذخیره نکرده‌ای</Text>
               <Text style={styles.emptyDescription}>در صفحهٔ هر تمرین، آن را به علاقه‌مندی‌ها اضافه کن تا اینجا ببینی.</Text>
               <Pressable accessibilityRole="button" onPress={() => router.navigate("/(tabs)/exercises")} style={styles.browseButton}>
-                <Text style={styles.browseButtonText}>گشتن در تمرین‌ها</Text>
                 <Ionicons color={theme.colors.background} name="arrow-back" size={17} />
+                <Text style={styles.browseButtonText}>گشتن در تمرین‌ها</Text>
               </Pressable>
             </View>
           )
@@ -241,11 +232,15 @@ export default function ProfileScreen() {
                     <Text style={styles.profileInitial}>{profile.displayName.slice(0, 1)}</Text>
                   </View>
                   <View style={styles.profileInfo}>
-                    <Text numberOfLines={1} style={styles.profileName}>{profile.displayName}</Text>
-                    <Text numberOfLines={1} style={styles.profileEmail}>{profile.email}</Text>
+                    <Text numberOfLines={1} style={styles.profileName}>
+                      {profile.displayName}
+                    </Text>
+                    <Text numberOfLines={1} style={styles.profileEmail}>
+                      {profile.email}
+                    </Text>
                     <View style={styles.localBadge}>
-                      <View style={styles.localDot} />
                       <Text style={styles.localBadgeText}>پروفایل محلی</Text>
+                      <View style={styles.localDot} />
                     </View>
                   </View>
                   <Ionicons color={theme.colors.primary} name="person-circle-outline" size={24} />
@@ -257,23 +252,12 @@ export default function ProfileScreen() {
                       <Ionicons color={theme.colors.primary} name="code-slash-outline" size={21} />
                     </View>
                     <View style={styles.aboutText}>
-                      <Text style={styles.aboutTitle}>درباره من</Text>
+                      <Text style={styles.aboutTitle}>ارتباط با برنامه نویس</Text>
                       <Text style={styles.aboutDescription}>برنامه‌نویس و سازندهٔ این اپلیکیشن</Text>
                     </View>
                     <Ionicons color={theme.colors.textSubtle} name="person-outline" size={20} />
                   </View>
                   <View style={styles.contactList}>
-                    <Pressable
-                      accessibilityHint="برنامهٔ تماس تلفنی را باز می‌کند"
-                      accessibilityLabel="تماس با شماره ۰۹۲۰ ۰۵۱ ۱۴۰۸"
-                      accessibilityRole="button"
-                      onPress={() => void openContactLink("tel:+989200511408", "شمارهٔ تماس")}
-                      style={styles.contactRow}
-                    >
-                      <Ionicons color={theme.colors.primary} name="call-outline" size={18} />
-                      <Text style={styles.contactValue}>۰۹۲۰ ۰۵۱ ۱۴۰۸</Text>
-                      <Ionicons color={theme.colors.textSubtle} name="open-outline" size={15} />
-                    </Pressable>
                     <Pressable
                       accessibilityHint="صفحهٔ تلگرام را باز می‌کند"
                       accessibilityLabel="تلگرام، آیدی Adhami_82"
@@ -293,30 +277,13 @@ export default function ProfileScreen() {
                       style={styles.contactRow}
                     >
                       <Ionicons color={theme.colors.primary} name="logo-linkedin" size={18} />
-                      <Text numberOfLines={1} style={styles.contactValue}>LinkedIn · abolfazl-adhami</Text>
+                      <Text numberOfLines={1} style={styles.contactValue}>
+                        LinkedIn · abolfazl-adhami
+                      </Text>
                       <Ionicons color={theme.colors.textSubtle} name="open-outline" size={15} />
                     </Pressable>
                   </View>
                 </View>
-
-                <Pressable
-                  accessibilityHint="پروفایل و علاقه‌مندی‌ها حذف می‌شوند و صفحهٔ ثبت‌نام باز می‌شود"
-                  accessibilityRole="button"
-                  disabled={isDeletingProfile}
-                  onPress={confirmProfileDeletion}
-                  style={({ pressed }) => [styles.deleteProfileButton, pressed && styles.deleteProfileButtonPressed, isDeletingProfile && styles.deleteProfileButtonDisabled]}
-                >
-                  {isDeletingProfile ? (
-                    <ActivityIndicator color={theme.colors.danger} size="small" />
-                  ) : (
-                    <Ionicons color={theme.colors.danger} name="person-remove-outline" size={20} />
-                  )}
-                  <View style={styles.deleteProfileText}>
-                    <Text style={styles.deleteProfileTitle}>حذف پروفایل و ثبت‌نام دوباره</Text>
-                    <Text style={styles.deleteProfileDescription}>پروفایل محلی و علاقه‌مندی‌ها پاک می‌شوند</Text>
-                  </View>
-                  <Ionicons color={theme.colors.textSubtle} name="chevron-back" size={17} />
-                </Pressable>
               </>
             ) : null}
             <View style={styles.favoritesHeading}>
@@ -325,7 +292,6 @@ export default function ProfileScreen() {
               </View>
               <View style={styles.favoritesHeadingText}>
                 <Text style={styles.sectionTitle}>حرکت‌های موردعلاقه</Text>
-                <Text style={styles.sectionCaption}>فهرست شخصی تو روی همین دستگاه</Text>
               </View>
             </View>
           </View>
