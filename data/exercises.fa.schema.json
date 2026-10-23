@@ -32,7 +32,19 @@
           "$ref": "#/$defs/nonEmptyString"
         },
         "category": {
-          "$ref": "#/$defs/nonEmptyString"
+          "type": "string",
+          "enum": [
+            "back",
+            "cardio",
+            "chest",
+            "lower arms",
+            "lower legs",
+            "neck",
+            "shoulders",
+            "upper arms",
+            "upper legs",
+            "waist"
+          ]
         },
         "body_part": {
           "type": "string",

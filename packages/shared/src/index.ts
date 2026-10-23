@@ -1,87 +1,165 @@
-export const LEVEL_LABELS = {
-  beginner: "مبتدی",
-  intermediate: "متوسط",
-  expert: "پیشرفته",
-} as const;
+export const EXERCISE_CATEGORIES = [
+  "back",
+  "cardio",
+  "chest",
+  "lower arms",
+  "lower legs",
+  "neck",
+  "shoulders",
+  "upper arms",
+  "upper legs",
+  "waist",
+] as const;
 
-export type Level = keyof typeof LEVEL_LABELS;
+export const BODY_PARTS = EXERCISE_CATEGORIES;
 
-export const FORCE_LABELS = {
-  pull: "کششی",
-  push: "فشاری",
-  static: "ایستا",
-} as const;
+export const EQUIPMENT_VALUES = [
+  "assisted",
+  "band",
+  "barbell",
+  "body weight",
+  "bosu ball",
+  "cable",
+  "dumbbell",
+  "elliptical machine",
+  "ez barbell",
+  "hammer",
+  "kettlebell",
+  "leverage machine",
+  "medicine ball",
+  "olympic barbell",
+  "resistance band",
+  "roller",
+  "rope",
+  "skierg machine",
+  "sled machine",
+  "smith machine",
+  "stability ball",
+  "stationary bike",
+  "stepmill machine",
+  "tire",
+  "trap bar",
+  "upper body ergometer",
+  "weighted",
+  "wheel roller",
+] as const;
 
-export type Force = keyof typeof FORCE_LABELS;
+export const MUSCLE_GROUPS = [
+  "abdominals",
+  "ankle stabilizers",
+  "ankles",
+  "biceps",
+  "calves",
+  "chest",
+  "core",
+  "deltoids",
+  "forearms",
+  "glutes",
+  "hamstrings",
+  "hands",
+  "hip flexors",
+  "latissimus dorsi",
+  "lats",
+  "lower back",
+  "obliques",
+  "quadriceps",
+  "rhomboids",
+  "rotator cuff",
+  "shoulders",
+  "soleus",
+  "trapezius",
+  "traps",
+  "triceps",
+  "upper back",
+  "wrist extensors",
+  "wrist flexors",
+  "wrists",
+] as const;
 
-export const MECHANIC_LABELS = {
-  isolation: "تک مفصلی (ایزوله)",
-  compound: "چند مفصلی (کامپاند)",
-} as const;
+export const TARGETS = [
+  "abductors",
+  "abs",
+  "adductors",
+  "biceps",
+  "calves",
+  "cardiovascular system",
+  "delts",
+  "forearms",
+  "glutes",
+  "hamstrings",
+  "lats",
+  "levator scapulae",
+  "pectorals",
+  "quads",
+  "serratus anterior",
+  "spine",
+  "traps",
+  "triceps",
+  "upper back",
+] as const;
 
-export type Mechanic = keyof typeof MECHANIC_LABELS;
+export const SECONDARY_MUSCLES = [
+  "abdominals",
+  "ankle stabilizers",
+  "ankles",
+  "back",
+  "biceps",
+  "brachialis",
+  "calves",
+  "chest",
+  "core",
+  "deltoids",
+  "feet",
+  "forearms",
+  "glutes",
+  "grip muscles",
+  "groin",
+  "hamstrings",
+  "hands",
+  "hip flexors",
+  "inner thighs",
+  "latissimus dorsi",
+  "lats",
+  "lower abs",
+  "lower back",
+  "obliques",
+  "quadriceps",
+  "rear deltoids",
+  "rhomboids",
+  "rotator cuff",
+  "shins",
+  "shoulders",
+  "soleus",
+  "sternocleidomastoid",
+  "trapezius",
+  "traps",
+  "triceps",
+  "upper back",
+  "upper chest",
+  "wrist extensors",
+  "wrist flexors",
+  "wrists",
+] as const;
 
-export const EQUIPMENT_LABELS = {
-  machine: "دستگاه",
-  cable: "سیم‌کش",
-  barbell: "هالتر",
-  dumbbell: "دمبل",
-  "body only": "وزن بدن",
-  bands: "کش ورزشی",
-  "medicine ball": "توپ طبی",
-  kettlebells: "کتل‌بل",
-  "foam roll": "فوم رول",
-  "e-z curl bar": "میله لاری (EZ)",
-  "exercise ball": "توپ سوئیسی",
-  other: "سایر",
-} as const;
-
-export type Equipment = keyof typeof EQUIPMENT_LABELS;
-
-export const CATEGORY_LABELS = {
-  strength: "قدرتی",
-  stretching: "کششی",
-  plyometrics: "پلایومتریک",
-  strongman: "مردان آهنین",
-  powerlifting: "پاورلیفتینگ",
-  cardio: "هوازی (کاردیو)",
-  "olympic weightlifting": "وزنه‌برداری المپیکی",
-} as const;
-
-export type Category = keyof typeof CATEGORY_LABELS;
-
-export const MUSCLE_LABELS = {
-  abdominals: "شکم",
-  abductors: "دورکننده‌ ران (ابداکتور)",
-  adductors: "نزدیک‌کننده‌ ران (اداکتور)",
-  biceps: "جلو بازو",
-  calves: "ساق پا",
-  chest: "سینه",
-  forearms: "ساعد",
-  glutes: "باسن (سرینی)",
-  hamstrings: "پشت پا (همسترینگ)",
-  lats: "زیربغل (پشتی بزرگ)",
-  "lower back": "فیله کمر",
-  "middle back": "بخش میانی پشت",
-  neck: "گردن",
-  quadriceps: "چهار سر ران",
-  shoulders: "شانه (دلتوئید)",
-  traps: "کول (ذوزنقه‌ای)",
-  triceps: "پشت بازو",
-} as const;
-
-export type Muscle = keyof typeof MUSCLE_LABELS;
+export type ExerciseCategory = (typeof EXERCISE_CATEGORIES)[number];
+export type BodyPart = (typeof BODY_PARTS)[number];
+export type Equipment = (typeof EQUIPMENT_VALUES)[number];
+export type MuscleGroup = (typeof MUSCLE_GROUPS)[number];
+export type Target = (typeof TARGETS)[number];
+export type SecondaryMuscle = (typeof SECONDARY_MUSCLES)[number];
 
 export interface Exercise {
   id: string;
   name: string;
-  level: Level;
-  force: Force | null;
-  mechanic: Mechanic | null;
-  equipment: Equipment | null;
-  primaryMuscles: Muscle[];
-  secondaryMuscles: Muscle[];
+  category: ExerciseCategory;
+  bodyPart: BodyPart;
+  equipment: Equipment;
   instructions: string[];
-  category: Category;
-  images: string[];
+  muscleGroup: MuscleGroup;
+  secondaryMuscles: SecondaryMuscle[];
+  target: Target;
+  image: string;
+  gifUrl: string;
+  mediaId: string;
+  createdAt: string;
 }

@@ -1,130 +1,40 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View, ScrollView } from "react-native";
 import { Image } from "expo-image";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CATEGORY_LABELS, EQUIPMENT_LABELS, LEVEL_LABELS } from "@gym-app/shared";
+import { EQUIPMENT_VALUES, EXERCISE_CATEGORIES } from "@gym-app/shared";
+import type { Equipment, ExerciseCategory } from "@gym-app/shared";
 import { getDatabase } from "../../database/client";
+import { listExercises, type ExerciseListItem as RepositoryExerciseListItem } from "../../database/exerciseRepository";
+import { resolveExerciseMediaAsset } from "../../utils/exerciseMedia";
 import { theme } from "../../theme/tokens";
 import { useRouter } from "expo-router";
+import { getExerciseLabel } from "../../types/exercise-labels.fa";
 
-type CategoryFilter = "all" | keyof typeof CATEGORY_LABELS;
+type CategoryFilter = "all" | ExerciseCategory;
 
 const CATEGORY_FILTERS: readonly { value: CategoryFilter; label: string }[] = [
   { value: "all", label: "همه" },
-  { value: "strength", label: CATEGORY_LABELS.strength },
-  { value: "stretching", label: CATEGORY_LABELS.stretching },
-  { value: "plyometrics", label: CATEGORY_LABELS.plyometrics },
-  { value: "strongman", label: CATEGORY_LABELS.strongman },
-  { value: "powerlifting", label: CATEGORY_LABELS.powerlifting },
-  { value: "cardio", label: CATEGORY_LABELS.cardio },
-  { value: "olympic weightlifting", label: CATEGORY_LABELS["olympic weightlifting"] },
+  ...EXERCISE_CATEGORIES.map((value) => ({ value, label: getExerciseLabel("category", value) })),
 ];
 
-type LevelFilter = "all" | keyof typeof LEVEL_LABELS;
-
-const LEVEL_FILTERS: readonly { value: LevelFilter; label: string }[] = [
-  { value: "all", label: "همهٔ سطح‌ها" },
-  { value: "beginner", label: LEVEL_LABELS.beginner },
-  { value: "intermediate", label: LEVEL_LABELS.intermediate },
-  { value: "expert", label: LEVEL_LABELS.expert },
-];
-
-type EquipmentFilter = "all" | keyof typeof EQUIPMENT_LABELS;
+type EquipmentFilter = "all" | Equipment;
 
 const EQUIPMENT_FILTERS: readonly { value: EquipmentFilter; label: string }[] = [
   { value: "all", label: "همهٔ تجهیزات" },
-  { value: "machine", label: EQUIPMENT_LABELS.machine },
-  { value: "cable", label: EQUIPMENT_LABELS.cable },
-  { value: "barbell", label: EQUIPMENT_LABELS.barbell },
-  { value: "dumbbell", label: EQUIPMENT_LABELS.dumbbell },
-  { value: "body only", label: EQUIPMENT_LABELS["body only"] },
-  { value: "bands", label: EQUIPMENT_LABELS.bands },
-  { value: "medicine ball", label: EQUIPMENT_LABELS["medicine ball"] },
-  { value: "kettlebells", label: EQUIPMENT_LABELS.kettlebells },
-  { value: "foam roll", label: EQUIPMENT_LABELS["foam roll"] },
-  { value: "e-z curl bar", label: EQUIPMENT_LABELS["e-z curl bar"] },
-  { value: "exercise ball", label: EQUIPMENT_LABELS["exercise ball"] },
-  { value: "other", label: EQUIPMENT_LABELS.other },
+  ...EQUIPMENT_VALUES.map((value) => ({ value, label: getExerciseLabel("equipment", value) })),
 ];
 
-interface ExerciseDatabaseRow {
-  id: string;
-  name: string;
-  category: string;
-  level: string;
-  equipment: string | null;
-  images_json: string;
-}
-
-interface ExerciseListItem {
-  id: string;
-  name: string;
-  category: string;
-  level: string;
-  equipment: string | null;
-  imageUrl: string | null;
+interface ExerciseListItem extends RepositoryExerciseListItem {
+  imageAsset: number | null;
 }
 
 interface ExerciseCardProps {
   item: ExerciseListItem;
 }
 
-function translatedLabel(labels: Readonly<Record<string, string>>, value: string | null, fallback: string): string {
-  if (value === null) {
-    return fallback;
-  }
-
-  return labels[value] ?? value;
-}
-
-const EXERCISE_IMAGE_BASE_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
-
-function resolveImageUrl(imagePath: string): string | null {
-  const trimmedPath = imagePath.trim();
-
-  if (/^https?:\/\//i.test(trimmedPath)) {
-    return trimmedPath;
-  }
-
-  const normalizedPath = trimmedPath.replace(/\\/g, "/").replace(/^\.\/+/, "");
-  const pathSegments = normalizedPath.split("/");
-
-  if (normalizedPath.length === 0 || normalizedPath.startsWith("/") || pathSegments.some((segment) => segment.length === 0 || segment === "." || segment === "..")) {
-    return null;
-  }
-
-  const encodedPath = pathSegments.map(encodeURIComponent).join("/");
-  return `${EXERCISE_IMAGE_BASE_URL}${encodedPath}`;
-}
-
-function firstImageUrl(imagesJson: string): string | null {
-  try {
-    const parsedImages: unknown = JSON.parse(imagesJson);
-
-    if (!Array.isArray(parsedImages)) {
-      return null;
-    }
-
-    for (const imagePath of parsedImages) {
-      if (typeof imagePath !== "string") {
-        continue;
-      }
-
-      const imageUrl = resolveImageUrl(imagePath);
-
-      if (imageUrl !== null) {
-        return imageUrl;
-      }
-    }
-  } catch (error: unknown) {
-    console.warn("An exercise image list could not be parsed.", error);
-  }
-
-  return null;
-}
-
-function ExerciseCard({ item }: ExerciseCardProps) {
+const ExerciseCard = memo(function ExerciseCard({ item }: ExerciseCardProps) {
   const router = useRouter();
   const [imageFailed, setImageFailed] = useState(false);
 
@@ -136,8 +46,8 @@ function ExerciseCard({ item }: ExerciseCardProps) {
       onPress={() => router.push({ pathname: "/exercise/[id]", params: { id: item.id } })}
       style={({ pressed }) => [styles.exerciseCard, pressed && styles.exerciseCardPressed]}
     >
-      {item.imageUrl !== null && !imageFailed ? (
-        <Image accessibilityLabel={`تصویر ${item.name}`} cachePolicy="disk" contentFit="cover" onError={() => setImageFailed(true)} source={{ uri: item.imageUrl }} style={styles.exerciseImage} transition={180} />
+      {item.imageAsset !== null && !imageFailed ? (
+        <Image accessibilityLabel={`تصویر ${item.name}`} contentFit="cover" onError={() => setImageFailed(true)} source={item.imageAsset} style={styles.exerciseImage} transition={180} />
       ) : (
         <View accessibilityLabel="تصویر تمرین در دسترس نیست" style={styles.imageFallback}>
           <Ionicons color={theme.colors.primary} name="barbell-outline" size={26} />
@@ -151,19 +61,21 @@ function ExerciseCard({ item }: ExerciseCardProps) {
 
         <View style={styles.metadataRow}>
           <Text numberOfLines={1} style={styles.metadataText}>
-            {translatedLabel(CATEGORY_LABELS, item.category, "دسته‌بندی دیگر")}
+            {getExerciseLabel("category", item.category)}
           </Text>
           <View style={styles.metadataDot} />
-          <Text style={styles.metadataText}>{translatedLabel(LEVEL_LABELS, item.level, "سطح نامشخص")}</Text>
+          <Text numberOfLines={1} style={styles.metadataText}>
+            {getExerciseLabel("target", item.target)}
+          </Text>
         </View>
 
         <Text numberOfLines={1} style={styles.equipmentText}>
-          {translatedLabel(EQUIPMENT_LABELS, item.equipment, "بدون تجهیزات مشخص")}
+          {getExerciseLabel("equipment", item.equipment)}
         </Text>
       </View>
     </Pressable>
   );
-}
+});
 
 export default function ExercisesScreen() {
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
@@ -172,7 +84,6 @@ export default function ExercisesScreen() {
   const [hasError, setHasError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
-  const [selectedLevel, setSelectedLevel] = useState<LevelFilter>("all");
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentFilter>("all");
 
   useEffect(() => {
@@ -184,19 +95,11 @@ export default function ExercisesScreen() {
 
       try {
         const database = await getDatabase();
-        const rows = await database.getAllAsync<ExerciseDatabaseRow>(
-          `SELECT id, name, category, level, equipment, images_json
-           FROM exercises
-           ORDER BY name COLLATE NOCASE`,
-        );
+        const rows = await listExercises(database);
 
         const items: ExerciseListItem[] = rows.map((row) => ({
-          id: row.id,
-          name: row.name,
-          category: row.category,
-          level: row.level,
-          equipment: row.equipment,
-          imageUrl: firstImageUrl(row.images_json),
+          ...row,
+          imageAsset: resolveExerciseMediaAsset(row.image),
         }));
         if (isMounted) {
           setExercises(items);
@@ -225,16 +128,28 @@ export default function ExercisesScreen() {
     const normalizedSearch = search.trim().toLocaleLowerCase();
 
     return exercises.filter((exercise) => {
-      const categoryLabel = translatedLabel(CATEGORY_LABELS, exercise.category, "").toLocaleLowerCase();
-      const matchesSearch = normalizedSearch.length === 0 || exercise.name.toLocaleLowerCase().includes(normalizedSearch) || categoryLabel.includes(normalizedSearch);
+      const searchableValues = [
+        exercise.name,
+        exercise.category,
+        exercise.bodyPart,
+        exercise.target,
+        exercise.muscleGroup,
+        getExerciseLabel("category", exercise.category),
+        getExerciseLabel("body_part", exercise.bodyPart),
+        getExerciseLabel("target", exercise.target),
+        getExerciseLabel("muscle", exercise.muscleGroup),
+        getExerciseLabel("equipment", exercise.equipment),
+      ].join(" ").toLocaleLowerCase();
+      const matchesSearch = normalizedSearch.length === 0 || searchableValues.includes(normalizedSearch);
       const matchesCategory = selectedCategory === "all" || exercise.category === selectedCategory;
 
-      const matchesLevel = selectedLevel === "all" || exercise.level === selectedLevel;
       const matchesEquipment = selectedEquipment === "all" || exercise.equipment === selectedEquipment;
 
-      return matchesSearch && matchesCategory && matchesLevel && matchesEquipment;
+      return matchesSearch && matchesCategory && matchesEquipment;
     });
-  }, [exercises, search, selectedCategory, selectedLevel, selectedEquipment]);
+  }, [exercises, search, selectedCategory, selectedEquipment]);
+
+  const renderExercise = useCallback(({ item }: { item: ExerciseListItem }) => <ExerciseCard item={item} />, []);
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -290,23 +205,6 @@ export default function ExercisesScreen() {
               );
             })}
           </ScrollView>
-          <ScrollView contentContainerStyle={styles.categoryFilters} horizontal showsHorizontalScrollIndicator={false}>
-            {LEVEL_FILTERS.map((filter) => {
-              const isSelected = selectedLevel === filter.value;
-
-              return (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: isSelected }}
-                  key={filter.value}
-                  onPress={() => setSelectedLevel(filter.value)}
-                  style={[styles.categoryFilter, isSelected && styles.categoryFilterSelected]}
-                >
-                  <Text style={[styles.categoryFilterText, isSelected && styles.categoryFilterTextSelected]}>{filter.label}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
         </View>
         {isLoading ? (
           <View style={styles.stateContainer}>
@@ -330,7 +228,6 @@ export default function ExercisesScreen() {
               onPress={() => {
                 setSearch("");
                 setSelectedCategory("all");
-                setSelectedLevel("all");
                 setSelectedEquipment("all");
               }}
               style={styles.retryButton}
@@ -344,8 +241,11 @@ export default function ExercisesScreen() {
             data={filteredExercises}
             keyExtractor={(item) => item.id}
             keyboardShouldPersistTaps="handled"
+            initialNumToRender={10}
+            maxToRenderPerBatch={8}
+            windowSize={7}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => <ExerciseCard item={item} />}
+            renderItem={renderExercise}
           />
         )}
       </View>

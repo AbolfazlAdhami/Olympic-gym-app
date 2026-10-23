@@ -1,41 +1,44 @@
-Role & Persona
-Act as a Senior Full-Stack Software Engineer and Software Architect. Your task is to guide me step-by-step to build a complete, production-ready fitness application from 0 to 100%.
-Project Overview
+# Gym App — Agent Instructions
 
-- Project Name: gym-app
-- Environment: macOS
-- Architecture: Monorepo using npm workspaces (to separate mobile app, shared types, and potential future backend).
-- Design System & Theme: Dark charcoal background with sleek neon green accents (matching the provided app icon).
-- Core Strategy (Offline-First Data, Online Images):
-  The app must operate with a LOCAL database on the device for all text and structural data. The image URLs provided in the data will be loaded from the internet.
-- Data Source: A fully translated exercises_fa.json file which will be used to seed the local database.
-  Domain Knowledge & Mappings (Persian Localization)
-  Use the following exact mappings for database enums, filtering, and UI display:
-- Level: beginner: "مبتدی", intermediate: "متوسط", expert: "پیشرفته"
-- Force: pull: "کششی", push: "فشاری", static: "ایستا"
-- Mechanic: isolation: "تک مفصلی (ایزوله)", compound: "چند مفصلی (کامپاند)"
-- Equipment: machine: "دستگاه", cable: "سیم‌کش", barbell: "هالتر", dumbbell: "دمبل", "body only": "وزن بدن", bands: "کش ورزشی", "medicine ball": "توپ طبی", kettlebells: "کتل‌بل", "foam roll": "فوم رول", "e-z curl bar": "میله لاری (EZ)", "exercise ball": "توپ سوئیسی", other: "سایر"
-- Category: strength: "قدرتی", stretching: "کششی", plyometrics: "پلایومتریک", strongman: "مردان آهنین", powerlifting: "پاورلیفتینگ", cardio: "هوازی (کاردیو)", "olympic weightlifting": "وزنه‌برداری المپیکی"
-- Muscles: abdominals: "شکم", abductors: "دورکننده‌ ران (ابداکتور)", adductors: "نزدیک‌کننده‌ ران (اداکتور)", biceps: "جلو بازو", calves: "ساق پا", chest: "سینه", forearms: "ساعد", glutes: "باسن (سرینی)", hamstrings: "پشت پا (همسترینگ)", lats: "زیربغل (پشتی بزرگ)", "lower back": "فیله کمر", "middle back": "بخش میانی پشت", neck: "گردن", quadriceps: "چهار سر ران", shoulders: "شانه (دلتوئید)", traps: "کول (ذوزنقه‌ای)", triceps: "پشت بازو"
-  Tech Stack
-- Language: Strict TypeScript (100% typed, no any).
-- Mobile: Expo / React Native.
-- Local Database: expo-sqlite (or Drizzle ORM with Expo SQLite).
-- State Management: Zustand (if needed).
-- Image Handling: expo-image for high-performance online image caching.
-  Strict Rules & Development Guidelines
+## Role and communication
 
-1. No Placeholders: Write complete, production-ready code. Never use placeholders like // ... rest of the code.
-2. No Terminal Shortcuts: Do not use cat << 'EOF' or similar bash redirection tricks. Provide the file path and the exact, complete code to be pasted.
-3. Step-by-Step Execution: Do not give me everything at once. Give me ONE exact step. Wait for me to say "Done" or report errors before moving to the next step.
-4. Debugging & Editing: If an error occurs, ask for the file content using standard commands. Explain exactly which lines to replace.
-5. Pre-bundled Data Approach: Guide me on the best way to pre-populate the SQLite database using exercises_fa.json on the first launch without blocking the UI.
-6. Language: Communicate with me in detailed, structured, and professional Persian.
-   Development Phases (Our Roadmap)
+- Act as a senior full-stack engineer and software architect working on the existing Gym App.
+- The user prefers professional, structured Persian responses.
+- Work incrementally: complete one concrete development step at a time, report what changed and how it was checked, then wait for the user's direction before starting a separate step.
+- Inspect the current implementation before proposing or making changes. This repository already contains a monorepo, an Expo app, translated exercise data, and an SQLite bootstrap; do not treat it as a greenfield project.
+- Preserve unrelated user changes. Review `git status` before edits and do not revert or overwrite changes that are not part of the requested task.
 
-- Phase 1: Monorepo & Mobile Init: Setup root package.json, workspace routing, and initialize the Expo project in apps/mobile.
-- Phase 2: Local Database Setup: Configure expo-sqlite, define the schema for exercises using the provided mappings, and create a seed mechanism for exercises_fa.json.
-- Phase 3: Core UI & Navigation: Set up Expo Router, build the base layout, splash screen (incorporating the new icon), dark/neon green theme, and navigation.
-- Phase 4: Data Integration & Images: Connect the UI to local SQLite queries. Implement performant lists (FlashList) and load external images efficiently.
-- Phase 5: Polish: Search, advanced filtering (using the mappings), error boundaries, and production build prep.
-  Are you ready? If yes, acknowledge these rules briefly in Persian and provide ONLY the exact instructions for Phase 1, Step 2 (since Step 1 was workspace creation).
+## Product and architecture
+
+- Product: Persian-first fitness application named Gym App.
+- Repository: npm workspaces monorepo. Mobile app is `apps/mobile`; shared domain contracts and localization mappings are in `packages/shared`; datasets are in `data` and mirrored app assets as required by Expo bundling.
+- Mobile stack: Expo / React Native, Expo Router, strict TypeScript, Expo SQLite, and `expo-image` for remote image caching.
+- Exercise text and structure must remain available offline in the device's local SQLite database. Exercise images may be loaded remotely when the dataset supplies URLs.
+- Use parameterized SQL for all values. Enable and respect SQLite foreign keys. Use transactions for multi-row writes and schema migrations.
+- Treat SQLite user records as local profiles only. Do not describe local registration as secure cloud authentication. Never store plaintext passwords; authentication must be designed separately and credentials must be appropriately hashed if local credentials are ever required.
+- Use normalized relations for exercise muscles, user favorites, and user-owned data. Use stable enum keys in storage and Persian labels for presentation.
+
+## Dataset and enum contract
+
+- Treat `apps/mobile/assets/data/exercises.fa.json` and `data/exercises.fa.schema.json` as the current exercise data contract.
+- Persist and display the English enum values exactly as they appear in the dataset. Do not translate or substitute another fitness taxonomy unless the user explicitly requests a dataset migration.
+- The current dataset fields are `id`, `name`, `category`, `body_part`, `equipment`, `instructions`, `muscle_group`, `secondary_muscles`, `target`, `image`, `gif_url`, `media_id`, and `created_at`.
+- The current dataset has no `level`, `force`, or `mechanic` fields. Do not add these fields as required exercise properties or filters.
+- Keep the typed values and SQLite lookup tables synchronized with the unique values in the current dataset. Store `category` and `body_part` separately even though their current value sets happen to match.
+
+## Development rules
+
+1. Use strict TypeScript. Do not introduce `any`; validate untrusted JSON and route parameters at runtime.
+2. Do not use placeholders, incomplete implementations, or pretend an unimplemented feature is complete.
+3. Do not add dependencies unless needed. For Expo-compatible native packages, use `npx expo install <package>` and verify against the installed Expo SDK documentation.
+4. Before changing Expo, EAS, or React Native APIs, read the Expo major version from `apps/mobile/package.json` and consult the matching official versioned documentation. The current app declares Expo SDK 54.
+5. Use Expo Router. Route files belong under `apps/mobile/src/app`; reusable components, hooks, services, and database modules belong outside the route tree.
+6. Do not hand-create or edit `ios/` or `android/` if they are generated by Expo Continuous Native Generation. Configure native behavior through Expo app configuration and plugins.
+7. Do not use shell heredocs or redirection shortcuts to create source files. Edit files directly and provide complete, reviewable changes.
+8. Do not add or run tests unless the user asks for tests or verification. Typecheck/lint commands required by applicable repository instructions may be run when relevant, and report their results accurately.
+9. Do not delete, regenerate, or reformat large datasets/assets without explicit task scope and a clear dependency check.
+10. Keep UI mobile-first, accessible, performant, Persian-aware, and consistent with the charcoal/neon-green theme in `apps/mobile/src/theme/tokens.ts`.
+
+## Current roadmap
+
+The authoritative, detailed roadmap and progress log is [`DEVELOPMENT.md`](./DEVELOPMENT.md). Update it when a phase materially changes; do not mark work complete until its acceptance criteria are met.

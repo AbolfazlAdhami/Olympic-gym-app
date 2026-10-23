@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFonts, Vazirmatn_400Regular, Vazirmatn_500Medium, Vazirmatn_600SemiBold, Vazirmatn_700Bold } from "@expo-google-fonts/vazirmatn";
 import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -30,6 +30,28 @@ export default function RootLayout() {
   });
   const [bootstrapState, setBootstrapState] = useState<BootstrapState>("loading");
   const [attempt, setAttempt] = useState(0);
+  const progressPosition = useRef(new Animated.Value(0)).current;
+  const fontReady = fontsLoaded || fontError !== null;
+
+  useEffect(() => {
+    if (bootstrapState !== "loading" || !fontReady) {
+      progressPosition.stopAnimation();
+      return;
+    }
+
+    const progressAnimation = Animated.loop(
+      Animated.timing(progressPosition, {
+        toValue: 1,
+        duration: 1250,
+        useNativeDriver: true,
+      }),
+    );
+
+    progressPosition.setValue(0);
+    progressAnimation.start();
+
+    return () => progressAnimation.stop();
+  }, [bootstrapState, fontReady, progressPosition]);
 
   useEffect(() => {
     let isMounted = true;
@@ -65,7 +87,6 @@ export default function RootLayout() {
     }
   }, [fontError]);
 
-  const fontReady = fontsLoaded || fontError !== null;
   const appReady = bootstrapState === "ready" && fontReady;
 
   return (
@@ -95,9 +116,34 @@ export default function RootLayout() {
               </>
             ) : (
               <>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Image
+                  accessibilityLabel="لوگوی اپلیکیشن المپیک"
+                  source={require("../../assets/icon.png")}
+                  style={styles.logo}
+                />
                 <Text style={styles.title}>در حال آماده‌سازی کتابخانه</Text>
                 <Text style={styles.description}>اطلاعات تمرین‌ها برای استفادهٔ آفلاین آماده می‌شوند.</Text>
+                <View
+                  accessibilityLabel="در حال آماده‌سازی اطلاعات تمرین‌ها"
+                  accessibilityRole="progressbar"
+                  style={styles.progressTrack}
+                >
+                  <Animated.View
+                    style={[
+                      styles.progressIndicator,
+                      {
+                        transform: [
+                          {
+                            translateX: progressPosition.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-148, 148],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                </View>
               </>
             )}
           </View>
@@ -133,6 +179,27 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.xxl,
     backgroundColor: theme.colors.surface,
+  },
+  logo: {
+    width: 104,
+    height: 104,
+    marginBottom: theme.spacing.xs,
+    borderRadius: theme.radius.xl,
+  },
+  progressTrack: {
+    width: "100%",
+    maxWidth: 296,
+    height: 5,
+    overflow: "hidden",
+    marginTop: theme.spacing.xl,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primaryMuted,
+  },
+  progressIndicator: {
+    width: "42%",
+    height: "100%",
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.primary,
   },
   title: {
     marginTop: theme.spacing.lg,

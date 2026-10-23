@@ -1,6 +1,13 @@
-import exerciseDataset from "../../assets/data/exercises_fa.json";
-import { CATEGORY_LABELS, EQUIPMENT_LABELS, FORCE_LABELS, LEVEL_LABELS, MECHANIC_LABELS, MUSCLE_LABELS } from "@gym-app/shared";
-import type { Category, Equipment, Exercise, Force, Level, Mechanic, Muscle } from "@gym-app/shared";
+import exerciseDataset from "../../assets/data/exercises.fa.json";
+import {
+  BODY_PARTS,
+  EQUIPMENT_VALUES,
+  EXERCISE_CATEGORIES,
+  MUSCLE_GROUPS,
+  SECONDARY_MUSCLES,
+  TARGETS,
+} from "@gym-app/shared";
+import type { BodyPart, Equipment, Exercise, ExerciseCategory, MuscleGroup, SecondaryMuscle, Target } from "@gym-app/shared";
 
 function asRecord(value: unknown, context: string): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -13,8 +20,8 @@ function asRecord(value: unknown, context: string): Record<string, unknown> {
 function readString(record: Record<string, unknown>, key: string): string {
   const value = record[key];
 
-  if (typeof value !== "string") {
-    throw new Error(`${key} must be a string.`);
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`${key} must be a non-empty string.`);
   }
 
   return value;
@@ -23,56 +30,52 @@ function readString(record: Record<string, unknown>, key: string): string {
 function readStringArray(record: Record<string, unknown>, key: string): string[] {
   const value = record[key];
 
-  if (!Array.isArray(value) || !value.every((item: unknown) => typeof item === "string")) {
-    throw new Error(`${key} must be an array of strings.`);
+  if (!Array.isArray(value) || !value.every((item: unknown) => typeof item === "string" && item.trim().length > 0)) {
+    throw new Error(`${key} must be an array of non-empty strings.`);
   }
 
   return value;
 }
 
-function parseEnum<T extends Record<string, string>>(value: unknown, labels: T, field: string): keyof T;
-function parseEnum<T extends Record<string, string>>(value: unknown, labels: T, field: string, nullable: true): keyof T | null;
-function parseEnum<T extends Record<string, string>>(value: unknown, labels: T, field: string, nullable = false): keyof T | null {
-  if (value === null && nullable) {
-    return null;
-  }
-
-  if (typeof value !== "string") {
-    throw new Error(`${field} must be a string${nullable ? " or null" : ""}.`);
-  }
-
-  const match = Object.entries(labels).find((entry) => entry[1] === value);
-
-  if (!match) {
+function parseEnum<T extends string>(value: string, allowedValues: readonly string[], field: string): T {
+  if (!allowedValues.some((allowedValue) => allowedValue === value)) {
     throw new Error(`Unknown ${field} value: ${value}`);
   }
 
-  return match[0] as keyof T;
-}
-
-function parseMuscles(value: unknown, field: string): Muscle[] {
-  if (!Array.isArray(value)) {
-    throw new Error(`${field} must be an array.`);
-  }
-
-  return value.map((item: unknown, index: number) => parseEnum(item, MUSCLE_LABELS, `${field}[${index}]`));
+  return value as T;
 }
 
 function parseExercise(value: unknown): Exercise {
   const record = asRecord(value, "Exercise");
+  const createdAt = readString(record, "created_at");
+
+  if (Number.isNaN(Date.parse(createdAt))) {
+    throw new Error("created_at must be a valid date-time string.");
+  }
+
+  const image = readString(record, "image");
+  const gifUrl = readString(record, "gif_url");
+
+  if (!image.startsWith("images/") || !gifUrl.startsWith("videos/")) {
+    throw new Error("Exercise image paths must use the images/ and videos/ directories.");
+  }
 
   return {
     id: readString(record, "id"),
     name: readString(record, "name"),
-    level: parseEnum(record["level"], LEVEL_LABELS, "level") as Level,
-    force: parseEnum(record["force"], FORCE_LABELS, "force", true) as Force | null,
-    mechanic: parseEnum(record["mechanic"], MECHANIC_LABELS, "mechanic", true) as Mechanic | null,
-    equipment: parseEnum(record["equipment"], EQUIPMENT_LABELS, "equipment", true) as Equipment | null,
-    primaryMuscles: parseMuscles(record["primaryMuscles"], "primaryMuscles"),
-    secondaryMuscles: parseMuscles(record["secondaryMuscles"], "secondaryMuscles"),
+    category: parseEnum<ExerciseCategory>(readString(record, "category"), EXERCISE_CATEGORIES, "category"),
+    bodyPart: parseEnum<BodyPart>(readString(record, "body_part"), BODY_PARTS, "body_part"),
+    equipment: parseEnum<Equipment>(readString(record, "equipment"), EQUIPMENT_VALUES, "equipment"),
     instructions: readStringArray(record, "instructions"),
-    category: parseEnum(record["category"], CATEGORY_LABELS, "category") as Category,
-    images: readStringArray(record, "images"),
+    muscleGroup: parseEnum<MuscleGroup>(readString(record, "muscle_group"), MUSCLE_GROUPS, "muscle_group"),
+    secondaryMuscles: readStringArray(record, "secondary_muscles").map((muscle) =>
+      parseEnum<SecondaryMuscle>(muscle, SECONDARY_MUSCLES, "secondary_muscles"),
+    ),
+    target: parseEnum<Target>(readString(record, "target"), TARGETS, "target"),
+    image,
+    gifUrl,
+    mediaId: readString(record, "media_id"),
+    createdAt,
   };
 }
 
