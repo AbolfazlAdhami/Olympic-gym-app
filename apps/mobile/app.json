@@ -32,11 +32,7 @@
     "experiments": {
       "typedRoutes": true
     },
-    "plugins": [
-      "expo-sqlite",
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-sqlite", "expo-router", "expo-font"],
     "extra": {
       "router": {},
       "eas": {

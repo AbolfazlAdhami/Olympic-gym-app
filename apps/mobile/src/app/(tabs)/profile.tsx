@@ -8,12 +8,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getDatabase } from "../../database/client";
 import { listFavoriteExercises, removeExerciseFromFavorites, type ExerciseListItem } from "../../database/exerciseRepository";
 import { deleteLocalProfile, getActiveProfile, type LocalProfile } from "../../database/profileRepository";
-import { resolveExerciseMediaUrl } from "../../utils/exerciseMedia";
+import { resolveExerciseMediaAsset } from "../../utils/exerciseMedia";
 import { getExerciseLabel } from "../../types/exercise-labels.fa";
 import { theme } from "../../theme/tokens";
 
 interface FavoriteExercise extends ExerciseListItem {
-  imageAsset: string | null;
+  imageAsset: number | null;
 }
 
 interface FavoriteRowProps {
@@ -80,7 +80,7 @@ export default function ProfileScreen() {
           const favoriteRows = await listFavoriteExercises(database, activeProfile.id);
           const favoriteItems: FavoriteExercise[] = favoriteRows.map((favorite) => ({
             ...favorite,
-            imageAsset: resolveExerciseMediaUrl(favorite.image),
+            imageAsset: resolveExerciseMediaAsset(favorite.image),
           }));
 
           if (isActive) {

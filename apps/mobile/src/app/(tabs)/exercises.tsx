@@ -7,7 +7,7 @@ import { EQUIPMENT_VALUES, EXERCISE_CATEGORIES } from "@gym-app/shared";
 import type { Equipment, ExerciseCategory } from "@gym-app/shared";
 import { getDatabase } from "../../database/client";
 import { listExercises, type ExerciseListItem as RepositoryExerciseListItem } from "../../database/exerciseRepository";
-import { resolveExerciseMediaUrl } from "../../utils/exerciseMedia";
+import { resolveExerciseMediaAsset } from "../../utils/exerciseMedia";
 import { theme } from "../../theme/tokens";
 import { useRouter } from "expo-router";
 import { getExerciseLabel } from "../../types/exercise-labels.fa";
@@ -21,7 +21,7 @@ type EquipmentFilter = "all" | Equipment;
 const EQUIPMENT_FILTERS: readonly { value: EquipmentFilter; label: string }[] = [{ value: "all", label: "همهٔ تجهیزات" }, ...EQUIPMENT_VALUES.map((value) => ({ value, label: getExerciseLabel("equipment", value) }))];
 
 interface ExerciseListItem extends RepositoryExerciseListItem {
-  imageAsset: string | null;
+  imageAsset: number | null;
 }
 
 interface ExerciseCardProps {
@@ -93,7 +93,7 @@ export default function ExercisesScreen() {
 
         const items: ExerciseListItem[] = rows.map((row) => ({
           ...row,
-          imageAsset: resolveExerciseMediaUrl(row.image),
+          imageAsset: resolveExerciseMediaAsset(row.image),
         }));
         if (isMounted) {
           setExercises(items);
