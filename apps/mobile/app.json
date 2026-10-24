@@ -39,6 +39,38 @@
         "projectId": "3f37caf6-a0d1-4540-8671-e4cbce1a995f"
       }
     },
-    "owner": "abolfazladhami82"
+    "owner": "abolfazladhami82",
+    "cli": {
+      "version": ">= 24.12.1",
+      "appVersionSource": "remote"
+    },
+    "build": {
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal"
+      },
+      "preview": {
+        "distribution": "internal"
+      },
+      "production": {
+        "autoIncrement": true
+      },
+      "local-apk": {
+        "extends": "preview",
+        "distribution": "internal",
+        "android": {
+          "buildType": "apk"
+        }
+      },
+      "bazaar-myket": {
+        "extends": "production",
+        "android": {
+          "buildType": "apk"
+        }
+      }
+    },
+    "submit": {
+      "production": {}
+    }
   }
 }
