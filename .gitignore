@@ -1,7 +1,18 @@
-node_modules
+# Dependencies
+node_modules/
 
-
+# macOS
 .DS_Store
 
-dist 
-release
+# Build outputs
+dist/
+build/
+release/
+
+# Expo
+.expo/
+
+# Environment files
+.env
+.env.*
+!.env.example
