@@ -1,44 +1,90 @@
-# Gym App — Agent Instructions
+# Agent Instructions
 
-## Role and communication
+These instructions apply to AI coding agents working in this repository. Read the relevant docs before making changes.
 
-- Act as a senior full-stack engineer and software architect working on the existing Gym App.
-- The user prefers professional, structured Persian responses.
-- Work incrementally: complete one concrete development step at a time, report what changed and how it was checked, then wait for the user's direction before starting a separate step.
-- Inspect the current implementation before proposing or making changes. This repository already contains a monorepo, an Expo app, translated exercise data, and an SQLite bootstrap; do not treat it as a greenfield project.
-- Preserve unrelated user changes. Review `git status` before edits and do not revert or overwrite changes that are not part of the requested task.
+## Start here
+1. Read `README.md`.
+2. Read `ROADMAP.md` and identify the current milestone/task.
+3. Read the relevant architecture, domain, API, and security documents.
+4. Inspect the existing code and tests before proposing or editing files.
+5. Follow existing project conventions unless there is a documented reason to change them.
 
-## Product and architecture
+## Core principles
+- TypeScript-first for mobile, admin, API, and shared domain logic. The backend framework is NestJS (default Express adapter initially), not a standalone Express app. Follow Nest modules/controllers/providers/guards/pipes conventions.
+- React Native for mobile; React for admin web.
+- Python is for AI/data tasks and optional isolated services—not a second implementation of core business rules without a clear need.
+- Prefer modular monolith architecture over microservices for initial versions.
+- Preserve the exercise catalog as the canonical source of exercise identity.
+- Use stable exercise IDs; never create fake IDs in generated plans.
+- LLM outputs are untrusted inputs. Validate all structured output using schemas and domain rules.
+- Do not let an LLM bypass authorization, safety, business constraints, or database validation.
+- Persian-first, RTL-aware UX; keep internal identifiers and enum values language-neutral.
+- Avoid unnecessary complexity and premature infrastructure.
+- Add/update tests for behavior changes.
+- Do not silently change schemas, API contracts, or persisted data formats.
 
-- Product: Persian-first fitness application named Gym App.
-- Repository: npm workspaces monorepo. Mobile app is `apps/mobile`; shared domain contracts and localization mappings are in `packages/shared`; datasets are in `data` and mirrored app assets as required by Expo bundling.
-- Mobile stack: Expo / React Native, Expo Router, strict TypeScript, Expo SQLite, and `expo-image` for remote image caching.
-- Exercise text and structure must remain available offline in the device's local SQLite database. Exercise images may be loaded remotely when the dataset supplies URLs.
-- Use parameterized SQL for all values. Enable and respect SQLite foreign keys. Use transactions for multi-row writes and schema migrations.
-- Treat SQLite user records as local profiles only. Do not describe local registration as secure cloud authentication. Never store plaintext passwords; authentication must be designed separately and credentials must be appropriately hashed if local credentials are ever required.
-- Use normalized relations for exercise muscles, user favorites, and user-owned data. Use stable enum keys in storage and Persian labels for presentation.
+## Coding rules
+- Use strict TypeScript.
+- Avoid `any`; use `unknown` and narrow it.
+- Validate external inputs at boundaries.
+- Keep domain logic separate from UI, database, and provider-specific code.
+- Use clear, domain-specific names.
+- Keep functions focused and reasonably small.
+- Prefer dependency injection for infrastructure-dependent domain/application services.
+- Avoid duplicated business logic across mobile, API, and admin. Shared packages should contain stable, reusable contracts/domain logic.
+- Never hardcode secrets, API keys, credentials, or tokens.
+- Never commit `.env`, local database files, user workout data, or private dataset exports.
+- Keep migrations reversible where practical and document data migration risks.
+- Avoid breaking changes without migration plans.
+- Use accessible controls, readable Persian typography, and RTL-correct layout.
+- Do not mirror exercise media or anatomical visuals simply because the UI is RTL.
 
-## Dataset and enum contract
+## AI-specific rules
+- AI-generated exercise facts, nutrition facts, and safety content must be reviewed before publication unless sourced from an explicitly trusted provider with documented provenance.
+- Provider API keys must only be used server-side.
+- AI-generated program output must reference catalog exercise IDs.
+- Validate JSON/schema, then validate semantic/business rules.
+- Use deterministic calculations for calories/macros, volume, set totals, progression rules, and other numeric domain logic.
+- Never claim certainty about medical diagnoses, injury treatment, or exact body-fat estimates.
+- Store prompt/template versions, provider/model identifiers, and review state where appropriate.
+- Make AI features observable and evaluate them with test/evaluation datasets.
 
-- Treat `apps/mobile/assets/data/exercises.fa.json` and `data/exercises.fa.schema.json` as the current exercise data contract.
-- Persist and display the English enum values exactly as they appear in the dataset. Do not translate or substitute another fitness taxonomy unless the user explicitly requests a dataset migration.
-- The current dataset fields are `id`, `name`, `category`, `body_part`, `equipment`, `instructions`, `muscle_group`, `secondary_muscles`, `target`, `image`, `gif_url`, `media_id`, and `created_at`.
-- The current dataset has no `level`, `force`, or `mechanic` fields. Do not add these fields as required exercise properties or filters.
-- Keep the typed values and SQLite lookup tables synchronized with the unique values in the current dataset. Store `category` and `body_part` separately even though their current value sets happen to match.
+## Data and privacy
+- Apply least-privilege access.
+- User health/fitness data is sensitive. Avoid logging full profile, measurements, photos, nutrition logs, or chat content by default.
+- Use explicit consent for optional photos and AI processing.
+- Support data export and deletion policies.
+- Protect admin enrichment routes and published dataset workflows.
 
-## Development rules
+## Testing
+- Unit-test domain rules and program generation.
+- Test API validation, auth, authorization, and error contracts.
+- Test offline workout behavior and sync conflicts.
+- Test AI structured-output validation with good, malformed, and adversarial cases.
+- Test RTL layouts and Persian localization.
+- Run lint, typecheck, tests, and build before declaring a task complete.
 
-1. Use strict TypeScript. Do not introduce `any`; validate untrusted JSON and route parameters at runtime.
-2. Do not use placeholders, incomplete implementations, or pretend an unimplemented feature is complete.
-3. Do not add dependencies unless needed. For Expo-compatible native packages, use `npx expo install <package>` and verify against the installed Expo SDK documentation.
-4. Before changing Expo, EAS, or React Native APIs, read the Expo major version from `apps/mobile/package.json` and consult the matching official versioned documentation. The current app declares Expo SDK 54.
-5. Use Expo Router. Route files belong under `apps/mobile/src/app`; reusable components, hooks, services, and database modules belong outside the route tree.
-6. Do not hand-create or edit `ios/` or `android/` if they are generated by Expo Continuous Native Generation. Configure native behavior through Expo app configuration and plugins.
-7. Do not use shell heredocs or redirection shortcuts to create source files. Edit files directly and provide complete, reviewable changes.
-8. Do not add or run tests unless the user asks for tests or verification. Typecheck/lint commands required by applicable repository instructions may be run when relevant, and report their results accurately.
-9. Do not delete, regenerate, or reformat large datasets/assets without explicit task scope and a clear dependency check.
-10. Keep UI mobile-first, accessible, performant, Persian-aware, and consistent with the charcoal/neon-green theme in `apps/mobile/src/theme/tokens.ts`.
+## Agent task workflow
+1. Summarize the task and constraints briefly.
+2. Inspect related code and docs.
+3. Propose the smallest appropriate implementation plan.
+4. Implement only the task scope.
+5. Add tests and documentation updates.
+6. Run relevant checks; report commands/results honestly.
+7. List changed files, decisions, limitations, and suggested next task.
 
-## Current roadmap
+## Commit conventions
+Use Conventional Commits, for example:
+- `feat(exercises): add exercise enrichment review workflow`
+- `feat(programs): generate beginner 3-day full-body plan`
+- `feat(workouts): persist workout sets offline`
+- `fix(api): validate program exercise identifiers`
+- `docs(roadmap): define milestone one deliverables`
 
-The authoritative, detailed roadmap and progress log is [`DEVELOPMENT.md`](./DEVELOPMENT.md). Update it when a phase materially changes; do not mark work complete until its acceptance criteria are met.
+## Don't
+- Don't build microservices prematurely.
+- Don't use LLM output directly as trusted DB writes.
+- Don't build a model from scratch in the initial roadmap.
+- Don't add dependency/framework without explaining the benefit.
+- Don't modify unrelated files.
+- Don't claim tests passed unless you actually ran them.
