@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/exercises.fa.schema.json",
+  "title": "Persian Fitness Exercises Dataset",
+  "description": "Fitness exercises dataset with Persian name and instructions; classification values remain in English.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/exercise"
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "instructions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "back",
+            "cardio",
+            "chest",
+            "lower arms",
+            "lower legs",
+            "neck",
+            "shoulders",
+            "upper arms",
+            "upper legs",
+            "waist"
+          ]
+        },
+        "body_part": {
+          "type": "string",
+          "enum": [
+            "back",
+            "cardio",
+            "chest",
+            "lower arms",
+            "lower legs",
+            "neck",
+            "shoulders",
+            "upper arms",
+            "upper legs",
+            "waist"
+          ]
+        },
+        "equipment": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "instructions": {
+          "$ref": "#/$defs/instructions"
+        },
+        "muscle_group": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "secondary_muscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        },
+        "target": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "media_id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^images/.+\\.(jpg|jpeg|png)$"
+        },
+        "gif_url": {
+          "type": "string",
+          "pattern": "^videos/.+\\.gif$"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "body_part",
+        "equipment",
+        "instructions",
+        "muscle_group",
+        "secondary_muscles",
+        "target",
+        "media_id",
+        "image",
+        "gif_url",
+        "created_at"
+      ]
+    }
+  }
+}

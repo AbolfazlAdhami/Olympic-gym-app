@@ -1,0 +1,24 @@
+# Keep the app's Git ignore rules here because .easignore replaces .gitignore.
+
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.kotlin/
+_.orig._
+_.jks
+_.p8
+_.p12
+_.key
+_.mobileprovision
+.metro-health-check_
+npm-debug._
+yarn-debug._
+yarn-error._
+.DS_Store
+_.pem
+.env*.local
+*.tsbuildinfo
+/ios/
+/android/
